@@ -216,6 +216,20 @@ The [R]{.kbd}+[S]{.kbd} combo is a good example:
 - Tap: types \"sh\"
 - Hold: activates Ctrl+Gui (useful for window management)
 
+A small struct tracks the key state:
+
+```c
+typedef struct {
+    uint16_t keycode;
+    uint16_t time;
+} tap_hold_state_t;
+
+static tap_hold_state_t tap_hold_state = {0};
+```
+
+On press, the keycode and timestamp are stored, and the hold modifier is
+registered immediately:
+
 ```c
 case MK_RS:
     tap_hold_state.keycode = keycode;
@@ -224,9 +238,12 @@ case MK_RS:
     return false;
 ```
 
-On release, the elapsed time determines whether it was a tap or hold:
+On release, the elapsed time determines whether it was a tap or hold. If the
+time since key press is less than `TAPPING_TERM` (220ms), it\'s a tap:
 
 ```c
+bool is_tap = TIMER_DIFF_16(record->event.time, tap_hold_state.time) < TAPPING_TERM;
+
 case MK_RS:
     unregister_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LGUI));
     if (is_tap) SEND_STRING("sh");
@@ -320,35 +337,62 @@ excellent QMK extensions.
   `os_keys` feature detects the OS and sends the right shortcut. Covers
   clipboard, navigation, zoom, find, and more.
 
-```c
+  ```c
   case OS_COPY:
       OS_TAP(G(KC_C), C(KC_C));  // Cmd+C on Mac, Ctrl+C elsewhere
   case OS_L_W:
       OS_REPEAT(A(KC_LEFT), C(KC_LEFT));  // word left
-```
+  ```
 
 - **Select word**, from Pascal Getreuer\'s collection. Select words and lines
   with a single key, hold to extend the selection. Handles OS differences
   internally.
 
-```c
+  ```c
   case MK_SEL_BACK:
       select_word_register('B');  // select word backward
   case MK_SEL_LINE:
       select_word_register('L');  // select entire line
-```
+  ```
 
 - **Sentence case**, another Getreuer feature. Automatically capitalizes the
   first letter after sentence-ending punctuation. Useful for prose, toggled off
   for code.
 
 - **Autocorrect**, QMK\'s built-in feature that fixes common typos as you type.
-  Includes a custom dictionary generated via `make autocorrect`.
+  A custom dictionary in `autocorrection_dict.txt` gets compiled into a binary
+  trie via `make autocorrect`. A `:` prefix or suffix marks a word boundary,
+  preventing false corrections within longer words. Sample entries:
+
+  ```
+  teh        -> the
+  taht       -> that
+  adn        -> and
+  seperate   -> separate
+  ocurred    -> occurred
+  :ture      -> true
+  ```
+
+  `:ture` must follow a word break, so it won\'t match \"feature\".
 
 - **LED/RGB indicator**, the onboard LED or RGB (depending on the
   microcontroller) provides visual feedback: solid on for Caps Word, slow blink
   for One-Shot Shift, double flash when autocorrect applies a correction, and
-  three blinks on startup to indicate connection.
+  three blinks on startup to indicate connection. QMK provides hooks to trigger
+  these states:
+
+  ```c
+  bool caps_word_set_user(bool active) {
+      caps_word_active = active;
+      indicator_set(active);
+      return true;
+  }
+
+  bool apply_autocorrect(uint8_t backspaces, const char *str, char *typo, ...) {
+      led_indicator_flash(2);  // double flash on correction
+      return true;
+  }
+  ```
 
 ## Light switches
 

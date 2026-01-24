@@ -28,26 +28,13 @@ The configuration lives in `~/.doom.d/` and follows a modular structure:
 The `init.el` declares which modules to load. Mine starts with personal modules
 (prefixed `:smallwat3r`), then Doom\'s built-in modules:
 
-```
+```lisp
 (doom! :smallwat3r
        claude
-       csv
-       debug
-       dired
-       docker
-       elfeed-ext
        evil-ext
-       filetypes
        git-ext
-       google
-       highlighting
-       mail-ext
-       modeline
-       org-ext
-       python-ext
-       slack
-       tools
        terminal
+       ;; ...
 
        :completion
        (corfu +orderless +icons +dabbrev)
@@ -453,7 +440,14 @@ IPv4, setting timeouts, and detecting dropped connections:
 ```
 
 Interactive rebase gets [J]{.kbd}/[K]{.kbd} bindings to move commits up and
-down, matching the rest of Evil\'s directional conventions.
+down, matching the rest of Evil\'s directional conventions:
+
+```lisp
+(after! git-rebase
+  (map! :map git-rebase-mode-map
+        "K" #'git-rebase-move-line-up
+        "J" #'git-rebase-move-line-down))
+```
 
 ## Programming setup
 
@@ -516,11 +510,19 @@ automatically loads these when called.
 
 From `autoload/buffer.el`:
 
-```
-my/save-and-close-buffer  ; save and kill in one action
-my/kill-buffer            ; kill without prompts for terminals
-my/kill-all-buffers       ; kill everything
-my/kill-all-buffers-except-current
+```lisp
+(defun my/save-and-close-buffer ()
+  "Save, close current buffer and display a confirmation message."
+  (interactive)
+  (save-buffer)
+  (message "Closed and saved: %s" (buffer-name))
+  (kill-buffer (current-buffer)))
+
+(defun my/kill-all-buffers-except-current ()
+  "Kill all buffers except the current one."
+  (interactive)
+  (mapc 'my/kill-buffer (delete (current-buffer) (buffer-list)))
+  (message "Killed all buffers except: %s" (current-buffer)))
 ```
 
 ## b. Insertions
@@ -572,16 +574,46 @@ From `autoload/process.el`, a fuzzy process killer showing CPU and memory usage:
 
 From `autoload/search.el`:
 
-```
-my/find-file-in-dotfiles              ; quick access to dotfiles
-my/where-am-i                         ; show current file path
-my/vertico-search-project-symbol-at-point  ; search symbol under cursor
+```lisp
+(defun my/find-file-in-dotfiles ()
+  "Find file in my dotfiles."
+  (interactive)
+  (doom-project-find-file my-dotfiles-dir))
+
+(defun my/where-am-i ()
+  "Display the current buffer's file path or buffer name."
+  (interactive)
+  (message (if (buffer-file-name)
+               (buffer-file-name)
+             (concat "buffer-name=" (buffer-name)))))
+
+(defun my/vertico-search-project-symbol-at-point (&optional arg)
+  "Performs a live project search for the thing at point."
+  (interactive)
+  (+vertico/project-search arg (thing-at-point 'symbol)))
 ```
 
 ## e. Window management
 
 From `autoload/window.el`, fine-grained scrolling and resizing, moving 3 lines
-or 5 columns at a time rather than Emacs defaults.
+or 5 columns at a time rather than Emacs defaults:
+
+```lisp
+(defun my/scroll-up ()
+  "Scroll view up by 3 lines."
+  (interactive)
+  (scroll-down 3))
+
+(defun my/scroll-down ()
+  "Scroll view down by 3 lines."
+  (interactive)
+  (scroll-up 3))
+
+(defun my/enlarge-window-horizontally ()
+  "Enlarge window horizontally by 5 columns."
+  (interactive)
+  (enlarge-window-horizontally 5))
+```
 
 ## Useful hacks
 

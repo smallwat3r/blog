@@ -235,18 +235,20 @@ The git segment uses this wrapper for all git calls:
 
 ```zsh
 __git_prompt_segment() {
-  local git_status branch dirty root paused
+  local git_status first_line branch dirty root paused
 
   git_status=$(__with_timeout git status --porcelain=v1 -b 2>/dev/null) || return
 
-  # extract branch, check dirty state, detect root...
+  # extract branch name from "## master...origin/master [ahead 1]"
+  first_line=${git_status%%$'\n'*}
+  branch=${first_line#\#\# }
+  branch=${branch%%...*}
+
+  # ...check dirty state, repo root...
 
   # PAUSED badge if last commit starts with "PAUSED"
-  local subject
-  subject=$(__with_timeout git log -1 --format="%s" 2>/dev/null)
-  if [[ $subject == PAUSED* ]]; then
-    paused=' %B%F{198}%K{52}[PAUSED]%b%f%k'
-  fi
+  local subject=$(__with_timeout git log -1 --format="%s" 2>/dev/null)
+  [[ $subject == PAUSED* ]] && paused=' %B%F{198}%K{52}[PAUSED]%b%f%k'
 
   printf '%s%%F{yellow} (%s%s%s)%%f ' "$paused" "$branch" "$dirty" "$root"
 }
@@ -449,17 +451,37 @@ vpytest() { _avenv_ensure && pytest "$@" }
 
 ## d. Docker helpers
 
-Formatted output and common operations:
+Formatted output and common operations. A helper formats output using column
+alignment:
 
+```zsh
+_docker_ps() {
+  local fmt='{{.ID}} ¬¬¬ {{.Image}} ¬¬¬ {{.Names}} ¬¬¬ {{.Status}} ¬¬¬ {{.Ports}}'
+  docker ps "$@" --format "$fmt" | column -t -s '¬¬¬'
+}
+
+dps()  { _docker_ps }
+dpsa() { _docker_ps -a }
 ```
-dps()    # list running containers, formatted
-dpsa()   # list all containers
-dlog()   # follow container logs
-dexe()   # exec into container
-dip()    # get container IP
-dstat()  # resource usage stats
-dprune() # clean up system
-# ...
+
+Exec into a container with an optional shell override:
+
+```zsh
+dexe() {
+  if [[ -z $1 ]]; then
+    echo "Usage: dexe <container> [shell]" >&2
+    return 1
+  fi
+  docker exec -it "$1" "${2:-/bin/sh}"
+}
+```
+
+Get container IP address:
+
+```zsh
+dip() {
+  docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$1"
+}
 ```
 
 ## e. Tailscale with FZF
@@ -495,6 +517,12 @@ Useful ones:
 - `cdf file`, cd to directory containing file
 - `o [path]`, open in file manager (xdg-open/open)
 - `timezsh [n]`, benchmark shell startup time
+
+The `take` function is a one-liner:
+
+```zsh
+mkdir -p "$@" && cd "$@" || return
+```
 
 ::: sep
 \~\~\~
