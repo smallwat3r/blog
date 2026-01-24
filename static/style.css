@@ -144,6 +144,7 @@ a.back {
 }
 .footer-section footer {
   margin-top: 0.5em;
+  padding-top: 0;
 }
 @media (min-width: 768px) {
   body {
