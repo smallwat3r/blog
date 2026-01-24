@@ -263,9 +263,23 @@ TRAMP\'s completion with all configured hosts:
 TRAMP can be slow out of the box. These settings help:
 
 ```lisp
-;; Reuse SSH ControlMaster connections
 (setq tramp-use-ssh-controlmaster-options nil)
+```
 
+This tells TRAMP not to add its own ControlMaster options, assuming you have it
+configured in `~/.ssh/config`:
+
+```
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+```
+
+This reuses SSH connections across TRAMP sessions. Make sure the socket directory
+exists (`mkdir -p ~/.ssh/sockets`).
+
+```lisp
 ;; Cache remote file properties longer
 (setq remote-file-name-inhibit-cache nil)
 
@@ -275,6 +289,9 @@ TRAMP can be slow out of the box. These settings help:
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
 ```
+
+The first caches remote file properties longer, reducing round-trips. The second
+disables version control checks on remote files, which can be slow over SSH.
 
 ## d. Remote file editing from shell
 
