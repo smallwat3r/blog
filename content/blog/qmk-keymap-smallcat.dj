@@ -365,15 +365,17 @@ excellent QMK extensions.
   preventing false corrections within longer words. Sample entries:
 
   ```
-  teh        -> the
-  taht       -> that
-  adn        -> and
+  becuase    -> because
+  definately -> definitely
   seperate   -> separate
-  ocurred    -> occurred
+  wierd      -> weird
   :ture      -> true
+  :wont:     -> won't
   ```
 
-  `:ture` must follow a word break, so it won\'t match \"feature\".
+  Without the leading `:`, `ture -> true` would incorrectly turn \"feature\"
+  into \"featrue\". `:wont:` requires word breaks on both sides, so \"unwonted\"
+  won\'t become \"unwon\'ted\".
 
 - **LED/RGB indicator**, the onboard LED or RGB (depending on the
   microcontroller) provides visual feedback: solid on for Caps Word, slow blink
