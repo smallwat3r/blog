@@ -27,7 +27,7 @@ override the default dot behavior after everything else is loaded).
 
 A loader function iterates through directories and sources files:
 
-```
+```zsh
 load_zsh_dir() {
   local dir=$1 file
   [[ -d $dir && -r $dir ]] || return 0
@@ -43,7 +43,7 @@ Machine-specific overrides, work-related configs, and private settings live in
 `.zshrc.private`, which isn\'t committed to the repository. It\'s loaded last,
 so it can override anything:
 
-```
+```zsh
 # private configs (loaded last)
 [[ -f $HOME/.zshrc.private ]] && source "$HOME/.zshrc.private"
 ```
@@ -60,7 +60,7 @@ Typing multiple dots expands into parent directory traversal. Type `...` and get
 slashes. Cleaner than the common `alias ..='cd ..'`, `alias ...='cd ../..'`
 pattern, and works with any command, not just cd:
 
-```
+```zsh
 __rationalise-dot() {
   [[ $LBUFFER = *.. ]] && LBUFFER+=/.. || LBUFFER+=.
 }
@@ -76,7 +76,7 @@ appends `/..` instead of just a dot.
 A clever trick that solves two problems at once. These aliases expand to a
 single space:
 
-```
+```zsh
 alias \$=" "
 alias %=" "
 ```
@@ -95,7 +95,7 @@ Both `$` and `%` work the same way.
 Global aliases expand anywhere in a command, not just at the start. They\'re
 shortcuts for common pipe patterns:
 
-```
+```zsh
 alias -g G="| grep"
 alias -g L="| less"
 alias -g H="| head"
@@ -120,7 +120,7 @@ Usage: `ps aux G nginx S` expands to `ps aux | grep nginx | sort`. Or
 
 The `hash -d` builtin creates named directories that work with tilde expansion:
 
-```
+```zsh
 hash -d \
   d="$HOME/dotfiles" \
   c="$HOME/code" \
@@ -138,7 +138,7 @@ Now `cd ~c` goes to `~/code`, `ls ~ssh` lists your SSH directory, and
 Instead of manually defining shell aliases for git commands, this reads your git
 config and creates `g<alias>` versions automatically:
 
-```
+```zsh
 () {
   local line key name
   local git_alias_lines
@@ -164,7 +164,7 @@ alias exists.
 [Ctrl+e]{.kbd} opens the current command in your editor. Essential for complex
 multi-line commands or fixing a long pipeline:
 
-```
+```zsh
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^e' edit-command-line
@@ -175,7 +175,7 @@ bindkey '^e' edit-command-line
 [Ctrl+a]{.kbd} expands aliases in place, so you can see what will actually run
 before hitting enter:
 
-```
+```zsh
 zle -C alias-expansion complete-word _generic
 bindkey '^a' alias-expansion
 zstyle ':completion:alias-expansion:*' completer _expand_alias
@@ -188,7 +188,7 @@ it. The `(Ie)` flag returns the index of an exact match, or 0 if not found. This
 pattern appears throughout the config for tools like Go, Rust, Emacs, and
 Homebrew packages:
 
-```
+```zsh
 # Only add to PATH if not already present
 if (( ${path[(Ie)$GOPATH/bin]} == 0 )); then
   path+=("$GOPATH/bin")
@@ -206,7 +206,7 @@ Simpler to maintain, no external dependencies, and full control over what it
 displays. The prompt shows error status, optional tag, Python virtualenv,
 directory, and git info:
 
-```
+```zsh
 PROMPT='%(?..%F{red}?%? )$(__tag)$(__is_venv)%f%3~%f$(__git_prompt_segment)%# '
 ```
 
@@ -216,7 +216,7 @@ The git segment shows branch, dirty state, root marker, and a special PAUSED
 badge. All git commands run with a 500ms timeout to prevent hanging on slow
 filesystems:
 
-```
+```zsh
 __with_timeout() {
   local timeout_cmd
   if command -v timeout &>/dev/null; then
@@ -233,7 +233,7 @@ __with_timeout() {
 
 The git segment uses this wrapper for all git calls:
 
-```
+```zsh
 __git_prompt_segment() {
   local git_status branch dirty root paused
 
@@ -260,7 +260,7 @@ refactor\"). The prompt reminds you there\'s incomplete work.
 
 The `tag` function adds custom text to the prompt:
 
-```
+```zsh
 tag() {
   _PROMPT_TAG="$1"
 }
@@ -282,7 +282,7 @@ Useful when you have multiple terminals open for different environments.
 ZSH can compile scripts to bytecode (`.zwc` files). The loader compiles files
 automatically when they change:
 
-```
+```zsh
 _zsh_compile_if_needed() {
   local src=$1 dst="${1}.zwc"
   [[ -n $src && -r $src ]] || return 1
@@ -297,7 +297,7 @@ _zsh_compile_if_needed() {
 The completion system is expensive to initialize. Instead of running `compinit`
 fully on every startup, the dump is cached:
 
-```
+```zsh
 () {
   local _zcompdump=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompdump
   mkdir -p "${_zcompdump:h}" >/dev/null 2>&1
@@ -313,7 +313,7 @@ fully on every startup, the dump is cached:
 
 Each tool config checks if the tool exists before loading:
 
-```
+```zsh
 (( $+commands[docker] )) || return
 ```
 
@@ -324,7 +324,7 @@ for tools that aren\'t installed.
 
 Set `DEBUG_ZSH_PERF=1` before starting a shell to enable profiling:
 
-```
+```zsh
 if (( ${+DEBUG_ZSH_PERF} )); then
   zmodload zsh/zprof
 fi
@@ -348,7 +348,7 @@ Average: 41 ms
 
 Completion settings enable fuzzy matching and a menu interface:
 
-```
+```zsh
 setopt COMPLETE_IN_WORD  # complete from both ends
 setopt AUTO_MENU         # menu after second tab
 setopt ALWAYS_TO_END     # cursor to end after completion
@@ -376,7 +376,7 @@ Three plugins loaded from system locations (no plugin manager):
 Syntax highlighting is configured to be minimal, with dangerous patterns
 highlighted:
 
-```
+```zsh
 ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=red,bold
 ZSH_HIGHLIGHT_STYLES[single-quoted-argument]=fg=yellow
 ZSH_HIGHLIGHT_STYLES[double-quoted-argument]=fg=yellow
@@ -392,7 +392,7 @@ ZSH_HIGHLIGHT_REGEXP+=('\bsudo\b' fg=164,bold)
 
 Git SSH commands use hardened options for reliability:
 
-```
+```zsh
 export GIT_SSH_COMMAND='ssh -4 \
   -o ConnectTimeout=10 \
   -o ServerAliveInterval=20 \
@@ -406,7 +406,7 @@ export GIT_SSH_COMMAND='ssh -4 \
 
 FZF uses ripgrep as backend and has minimal colors:
 
-```
+```zsh
 bindkey '^W' fzf-history-widget  # Ctrl+W for history
 
 export FZF_DEFAULT_OPTS="
@@ -422,7 +422,7 @@ export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 
 A function walks up the directory tree to find and activate the nearest `.venv`:
 
-```
+```zsh
 avenv() {
   local dir=$PWD
   while :; do
@@ -441,7 +441,7 @@ avenv() {
 
 Helper commands use this automatically:
 
-```
+```zsh
 vpython() { _avenv_ensure && python "$@" }
 vpip()    { _avenv_ensure && pip "$@" }
 vpytest() { _avenv_ensure && pytest "$@" }
@@ -466,7 +466,7 @@ dprune() # clean up system
 
 FZF-powered device selection for Tailscale operations:
 
-```
+```zsh
 _ts_select_device() {
   tailscale status --json \
     | jq -r '.Peer[] | "\(.DNSName | split(".")[0])\t\(.TailscaleIPs[0])"' \
@@ -483,7 +483,7 @@ ts-send() { tailscale file cp "$@" "$(_ts_select_device):" }
 
 Autoloaded functions in `~/.zsh/functions/` only load when first called:
 
-```
+```zsh
 fpath=("$fn_dir" $fpath)
 autoload -U "$fn_dir"/*(:tN)
 ```

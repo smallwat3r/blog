@@ -12,7 +12,7 @@ ALL_HTML := $(BLOG_HTML) $(BUILD)/about.html $(BUILD)/index.html
 # Extract body after frontmatter and convert to HTML
 define dj2html
 	@mkdir -p $(dir $@)
-	@awk '/^---$$/{n++; next} n>=2' $< | pandoc -f djot -t html --no-highlight -o $@
+	@awk '/^---$$/{n++; next} n>=2' $< | pandoc -f djot -t html -o $@
 endef
 
 all: build

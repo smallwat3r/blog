@@ -45,7 +45,7 @@ bottom row does double duty through tap-hold:
 Holding a key activates its layer. Tapping types the letter. This is achieved
 through QMK\'s `LT()` and `MT()` macros:
 
-```
+```c
 #define K_LH2 LT(SYM2, KC_R)  // hold: SYM2 layer, tap: R
 #define K_LH3 LT(NUM, KC_T)   // hold: NUM layer, tap: T
 #define K_LB1 MT(MOD_LCTL, KC_K)  // hold: Ctrl, tap: K
@@ -87,7 +87,7 @@ making it easy to reason about and modify.
 
 Each layer is defined as 8 small macros, one per hand and row:
 
-```
+```c
 // BASE layer: left hand
 #define BASE_L_TOP   K_LT1, K_LT2, K_LT3
 #define BASE_L_HOME  K_LH1, K_LH2, K_LH3, K_LH4, K_LH5
@@ -103,7 +103,7 @@ Each layer is defined as 8 small macros, one per hand and row:
 
 A `LAYER_DEF` macro assembles these parts into a full layer:
 
-```
+```c
 #define LAYOUT_wrapper(...) LAYOUT(__VA_ARGS__)
 #define LAYER_DEF(layer) LAYOUT_wrapper( \
     layer##_L_TOP,   layer##_R_TOP, \
@@ -117,7 +117,7 @@ The `##` token pasting operator concatenates the layer name with each suffix. So
 `LAYER_DEF(BASE)` expands to use `BASE_L_TOP`, `BASE_R_TOP`, and so on. The
 keymap array becomes concise:
 
-```
+```c
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [BASE] = LAYER_DEF(BASE),
     [NUM]  = LAYER_DEF(NUM),
@@ -129,7 +129,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 This pattern has a few nice properties. First, you can reuse parts across
 layers. The SYM2 layer shares most keys with SYM:
 
-```
+```c
 #define SYM2_L_TOP  SYM_L_TOP   // reuse SYM's top row
 #define SYM2_L_BOT  SYM_L_BOT   // reuse SYM's bottom row
 #define SYM2_L_HOME S(KC_8), KC_R, KC_AMPR, KC_PIPE, S(KC_5)  // custom
@@ -145,7 +145,7 @@ These aliases also encode modifiers and layer-taps at the key level, not the
 layer level. This keeps layer definitions clean and ensures combos work
 consistently since they reference positions, not raw keycodes:
 
-```
+```c
 #define K_LH1 MT(MOD_LSFT, KC_W)   // hold: Shift, tap: W
 #define K_LH2 LT(SYM2, KC_R)       // hold: SYM2, tap: R
 #define K_LTH1 LT(EDIT, KC_TAB)    // hold: EDIT, tap: Tab
@@ -166,7 +166,7 @@ keys that don\'t repeat, to avoid accidental activations. Combos are defined in
 `combos.def`, a special file that QMK preprocesses to generate the boilerplate
 code for each combo automatically. Here is an example:
 
-```
+```c
 COMB(C_BL_Z, KC_Z, K_LT1, K_LT2, K_LT3)  // L+D+P = Z
 COMB(C_BL_Q, KC_Q, K_LT2, K_LT3)         // D+P = Q
 COMB(C_BL_B, KC_B, K_LH2, K_LH3)         // R+T = B
@@ -175,7 +175,7 @@ COMB(C_BL_B, KC_B, K_LH2, K_LH3)         // R+T = B
 
 Beyond missing letters, combos handle common digraphs and text shortcuts:
 
-```
+```c
 SUBS(C_BL_TH, "th", K_LH3, K_LH4)         // T+S = "th"
 SUBS(C_BL_WH, "wh", K_LH1, K_LH4)         // W+S = "wh"
 SUBS(C_BR_ING, "ing", K_RH2, K_RH5)       // N+I = "ing"
@@ -201,7 +201,7 @@ The solution is SYM2, a symbol layer that passes through the home row letters.
 When you hold [R]{.kbd} and tap [A]{.kbd}, you get lowercase \'a\', not a
 symbol:
 
-```
+```c
 // SYM2: symbols with home row passthrough for rolls
 #define SYM2_R_HOME S(KC_1), S(KC_SCLN), KC_A, KC_E, S(KC_BSLS)
 ```
@@ -216,9 +216,7 @@ The [R]{.kbd}+[S]{.kbd} combo is a good example:
 - Tap: types \"sh\"
 - Hold: activates Ctrl+Gui (useful for window management)
 
-<!-- -->
-
-```
+```c
 case MK_RS:
     tap_hold_state.keycode = keycode;
     tap_hold_state.time = record->event.time;
@@ -228,7 +226,7 @@ case MK_RS:
 
 On release, the elapsed time determines whether it was a tap or hold:
 
-```
+```c
 case MK_RS:
     unregister_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LGUI));
     if (is_tap) SEND_STRING("sh");
@@ -241,7 +239,7 @@ A common frustration with home-row mods is accidental activation when typing
 quickly. QMK\'s chordal hold feature helps, it only triggers a hold if the next
 key is on the opposite hand:
 
-```
+```c
 const char chordal_hold_layout[MATRIX_ROWS][MATRIX_COLS] PROGMEM =
     LAYOUT(
              'L', 'L', 'L',            'R', 'R', 'R',
@@ -259,7 +257,7 @@ marked `'*'` to work with either hand.
 Not all combos are equal. Some key pairs are easier to hit together than others.
 The config defines different timing windows:
 
-```
+```c
 #define COMBO_TERM 35
 #define COMBO_TERM_RELAXED 50
 #define COMBO_TERM_TIGHT 20
@@ -268,7 +266,7 @@ The config defines different timing windows:
 Brackets get tight timing (20ms) because false positives are annoying. Digraphs
 like \"th\" get relaxed timing (50ms) because they\'re typed in sequence:
 
-```
+```c
 uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
     switch (combo_index) {
         case C_BL_TH:
@@ -288,7 +286,7 @@ uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
 The UNI layer (hold [P]{.kbd}) provides French accented characters. QMK\'s
 unicode feature maps key presses to unicode code points:
 
-```
+```c
 const uint32_t PROGMEM unicode_map[] = {
     [UN_E_ACUTE] = 0x00E9,      // é
     [UN_E_GRAVE] = 0x00E8,      // è
@@ -300,7 +298,7 @@ const uint32_t PROGMEM unicode_map[] = {
 
 The keyboard auto-detects the OS and switches unicode input mode:
 
-```
+```c
 switch (detected_os) {
     case OS_MACOS:
         set_unicode_input_mode(UNICODE_MODE_MACOS);
@@ -322,7 +320,7 @@ excellent QMK extensions.
   `os_keys` feature detects the OS and sends the right shortcut. Covers
   clipboard, navigation, zoom, find, and more.
 
-```
+```c
   case OS_COPY:
       OS_TAP(G(KC_C), C(KC_C));  // Cmd+C on Mac, Ctrl+C elsewhere
   case OS_L_W:
@@ -333,7 +331,7 @@ excellent QMK extensions.
   with a single key, hold to extend the selection. Handles OS differences
   internally.
 
-```
+```c
   case MK_SEL_BACK:
       select_word_register('B');  // select word backward
   case MK_SEL_LINE:

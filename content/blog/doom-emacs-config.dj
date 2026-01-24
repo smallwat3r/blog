@@ -107,7 +107,7 @@ that\'s surprisingly readable for code.
 Font configuration handles multiple scenarios, daemon mode, different operating
 systems, and fallbacks when fonts aren\'t installed:
 
-```
+```lisp
 (defun my/safe-font (fonts &rest spec)
   "Return a font-spec using the first available font in FONTS."
   (let ((available
@@ -135,7 +135,7 @@ which needs different font sizes.
 The dashboard is minimal, just a \"MAIN BUFFER\" heading with system info. It
 serves as a stable anchor point:
 
-```
+```lisp
 (defun my/dashboard-message ()
   (insert (concat "MAIN BUFFER\n"
                   my-title-emacs-version
@@ -148,14 +148,14 @@ serves as a stable anchor point:
 The mode-line is tailored to be simple and easy on the eye. It shows buffer
 count, useful for knowing how many files you have open:
 
-```
+```lisp
 '(:eval (format "  b(%s)" (my/number-of-buffers)))
 ```
 
 Line numbers get colorized every 5th line, making it easy to estimate jump
 distances when using relative line numbers:
 
-```
+```lisp
 (setq display-line-numbers-minor-tick 5
       display-line-numbers-major-tick 5)
 
@@ -168,7 +168,7 @@ distances when using relative line numbers:
 Evil mode (Vim emulation) gets several tweaks. Cursor colors indicate the
 current state at a glance:
 
-```
+```lisp
 (setq evil-default-state-cursor  '(box "cyan3")
       evil-normal-state-cursor   '(box "cyan3")
       evil-insert-state-cursor   '(bar "green3")
@@ -181,7 +181,7 @@ I use a [non-standard keyboard layout](qmk-keymap-smallcat.html), so many
 bindings have duplicates that work on both QWERTY and my layout. For example,
 window navigation:
 
-```
+```lisp
 ;; Standard QWERTY
 "wh" #'evil-window-left
 "wj" #'evil-window-down
@@ -203,7 +203,7 @@ ensures they\'re applied last and makes them easy to find.
 Module-specific bindings are guarded by `modulep!` checks, so they only load
 when the module is active:
 
-```
+```lisp
 (when (modulep! :smallwat3r terminal)
   (map!
    :leader
@@ -224,7 +224,7 @@ Some bindings use semicolon as a prefix for quick file operations:
 Insert mode gets arrow key equivalents on [C-h/j/k/l]{.kbd}, making small
 movements possible without leaving insert mode:
 
-```
+```lisp
 :map evil-insert-state-map
 "C-h" #'evil-backward-char
 "C-l" #'evil-forward-char
@@ -241,7 +241,7 @@ and TRAMP for remote file access.
 
 TRAMP is configured to parse multiple SSH config files for host completion:
 
-```
+```lisp
 (defvar my-ssh-config-files
   '("~/.ssh/config"
     "~/.ssh/work"
@@ -264,7 +264,7 @@ TRAMP is configured to parse multiple SSH config files for host completion:
 [SPC o .]{.kbd} prompts with `read-file-name` starting at `/ssh:`, triggering
 TRAMP\'s completion with all configured hosts:
 
-```
+```lisp
 (defun my/open-remote-conn ()
   "Open remote SSH connection with Tramp."
   (interactive)
@@ -275,7 +275,7 @@ TRAMP\'s completion with all configured hosts:
 
 TRAMP can be slow out of the box. These settings help:
 
-```
+```lisp
 ;; Reuse SSH ControlMaster connections
 (setq tramp-use-ssh-controlmaster-options nil)
 
@@ -294,7 +294,7 @@ TRAMP can be slow out of the box. These settings help:
 When opening vterm on a remote TRAMP connection, a hook injects an `e` shell
 function to open remote files from the remote shell in a local Emacs buffer:
 
-```
+```bash
 # From remote shell:
 $ e .bashrc      # Opens /ssh:user@host:.bashrc in Emacs
 $ e src/main.rs  # Relative paths work too
@@ -302,7 +302,7 @@ $ e src/main.rs  # Relative paths work too
 
 A helper extracts the TRAMP prefix from the current connection:
 
-```
+```lisp
 (defun my/vterm-tramp-base-path ()
   "Return the Tramp prefix without the directory."
   (let* ((vec (or (car (tramp-list-connections))
@@ -320,7 +320,7 @@ A helper extracts the TRAMP prefix from the current connection:
 
 The hook injects the `e` function using vterm\'s OSC 51 escape sequence:
 
-```
+```lisp
 (defun my/vterm-buffer-hooks-on-tramp ()
   "Set up vterm for remote Tramp connections."
   (when (and (eq major-mode 'vterm-mode)
@@ -361,7 +361,7 @@ tracked per project, allowing multiple concurrent chats.
 Creating a new session spawns a vterm buffer and runs the `claude` command. The
 buffer is named with the project and session number:
 
-```
+```lisp
 (defun my/claude-new (&optional dir)
   "Start a new Claude session in DIR."
   (interactive)
@@ -383,7 +383,7 @@ The module provides functions to send code to Claude.
 `my/claude-send-region-with-context` wraps the selection with filename and line
 number, giving Claude more context about where the code lives:
 
-```
+```lisp
 (defun my/claude-send-region-with-context (beg end)
   "Send region to Claude with file context."
   (interactive "r")
@@ -397,7 +397,7 @@ number, giving Claude more context about where the code lives:
 `my/claude-send-region-with-prompt` prepends a prompt prefix from a customizable
 list of common operations:
 
-```
+```lisp
 (defcustom my-claude-prompt-prefixes
   '("Explain this code"
     "Review this code"
@@ -424,7 +424,7 @@ current buffer or region directly.
 Magit gets several quality-of-life improvements. First, the [h]{.kbd} and
 [l]{.kbd} keys are unbound so they work for cursor movement in Evil mode:
 
-```
+```lisp
 (define-key magit-mode-map (kbd "l") nil)
 (define-key magit-mode-map (kbd "h") nil)
 ```
@@ -432,7 +432,7 @@ Magit gets several quality-of-life improvements. First, the [h]{.kbd} and
 After committing, all `COMMIT_EDITMSG` buffers are killed automatically,
 including duplicates that accumulate when working with multiple repositories:
 
-```
+```lisp
 (add-hook! 'git-commit-post-finish-hook
   (dolist (buf (buffer-list))
     (when (string-prefix-p "COMMIT_EDITMSG" (buffer-name buf))
@@ -442,7 +442,7 @@ including duplicates that accumulate when working with multiple repositories:
 Git SSH commands from Emacs use custom options to improve reliability - forcing
 IPv4, setting timeouts, and detecting dropped connections:
 
-```
+```lisp
 (setenv "GIT_SSH_COMMAND" "ssh -4 \
   -o ConnectTimeout=10 \
   -o ServerAliveInterval=20 \
@@ -461,14 +461,14 @@ I use [Eglot](https://github.com/joaotavora/eglot) for LSP instead of lsp-mode.
 It\'s built into Emacs 29+ and requires less configuration. Inlay hints are
 disabled as I find them distracting:
 
-```
+```lisp
 (add-hook! 'eglot-managed-mode-hook (eglot-inlay-hints-mode -1))
 ```
 
 Python uses [basedpyright](https://github.com/DetachHead/basedpyright) for type
 checking, with black and isort for formatting:
 
-```
+```lisp
 (set-eglot-client! 'python-mode '("basedpyright-langserver" "--stdio"))
 
 (set-formatter! 'black
@@ -479,7 +479,7 @@ checking, with black and isort for formatting:
 A custom function toggles f-string prefixes on Python strings. With the cursor
 inside a string, [SPC m f]{.kbd} adds or removes the `f` prefix:
 
-```
+```lisp
 (defun my/python-toggle-fstring ()
   "Toggle f-string prefix on the current Python string literal."
   (interactive)
@@ -502,7 +502,7 @@ poetry, or pyenv.
 Flycheck runs on-demand rather than automatically. I find constant linting
 distracting, so it\'s triggered explicitly when needed:
 
-```
+```lisp
 (remove-hook! 'eglot-managed-mode-hook #'flycheck-eglot-mode)
 (remove-hook! 'doom-first-buffer-hook #'global-flycheck-mode)
 ```
@@ -527,7 +527,7 @@ my/kill-all-buffers-except-current
 
 From `autoload/insert.el`:
 
-```
+```lisp
 (defun my/insert-timestamp (&optional datetime)
   "Insert current date or date+time."
   (interactive "P")
@@ -546,7 +546,7 @@ From `autoload/insert.el`:
 
 From `autoload/process.el`, a fuzzy process killer showing CPU and memory usage:
 
-```
+```lisp
 (defun my/fuzzy-kill-process ()
   "Fuzzy-pick a system process and send SIGKILL."
   (interactive)
@@ -592,7 +592,7 @@ hooks) can\'t access Wayland because the daemon started without those
 environment variables. This hook pulls Wayland vars from new emacsclient frames
 into the daemon\'s environment:
 
-```
+```lisp
 (when (and (daemonp) (eq system-type 'gnu/linux))
   (defun my/update-wayland-env-from-frame ()
     "Update WAYLAND_DISPLAY and SWAYSOCK from the current frame."
@@ -609,7 +609,7 @@ into the daemon\'s environment:
 
 Several Doom defaults are disabled to reduce bloat or avoid conflicts:
 
-```
+```lisp
 (disable-packages!
  lsp-python-ms  ; prefer basedpyright
  pipenv         ; prefer poetry
@@ -624,7 +624,7 @@ Several Doom defaults are disabled to reduce bloat or avoid conflicts:
 Quick expansions. Typing `ifn` in Python expands to the main guard pattern,
 `pdb` inserts a debugger breakpoint:
 
-```
+```lisp
 (define-abbrev-table 'python-mode-abbrev-table
   '(("ifn" "if __name__ == \"__main__\":\n    " nil 0)
     ("pdb" "import pdb; pdb.set_trace()  # debug" nil 0)
@@ -636,7 +636,7 @@ Quick expansions. Typing `ifn` in Python expands to the main guard pattern,
 Handle common operations that Emacs makes awkward. Killing a vterm buffer
 normally prompts about the running process, this wrapper suppresses that:
 
-```
+```lisp
 (defun my/kill-buffer (&optional buffer)
   "Kill current buffer without prompts for term/vterm/eshell."
   (interactive)
@@ -656,7 +656,7 @@ I maintain two Emacs themes -
 [simplicity](https://github.com/smallwat3r/emacs-simplicity-theme). They\'re
 loaded from GitHub via Doom\'s package system:
 
-```
+```lisp
 (package! creamy-theme
   :recipe (:host github :repo "smallwat3r/emacs-creamy-theme"))
 ```

@@ -49,6 +49,25 @@ code {
 pre code {
   padding: 0;
 }
+
+/* Syntax highlighting - creamy theme */
+code span.kw { color: #800080; } /* keyword - Purple */
+code span.cf { color: #800080; } /* control flow - Purple */
+code span.dv { color: #008B8B; } /* decimal value - DarkCyan */
+code span.bn { color: #008B8B; } /* base n - DarkCyan */
+code span.fl { color: #008B8B; } /* float - DarkCyan */
+code span.ch { color: #00868B; } /* char - turquoise4 */
+code span.st { color: #00868B; } /* string - turquoise4 */
+code span.vs { color: #00868B; } /* verbatim string - turquoise4 */
+code span.ss { color: #00868B; } /* special string - turquoise4 */
+code span.co { color: #8B8B00; font-style: italic; } /* comment - yellow4 */
+code span.do { color: #8B0000; font-style: italic; } /* documentation - DarkRed */
+code span.an { color: #8B8B00; font-style: italic; } /* annotation - yellow4 */
+code span.cv { color: #8B8B00; font-style: italic; } /* comment var - yellow4 */
+code span.sc { color: #458B00; } /* special char - chartreuse4 */
+code span.wa { color: #CD3700; font-weight: bold; } /* warning - OrangeRed3 */
+code span.al { color: #EE2C2C; font-weight: bold; } /* alert - firebrick2 */
+code span.er { color: #EE2C2C; font-weight: bold; } /* error - firebrick2 */
 .pre-wrapper {
   position: relative;
   cursor: pointer;
