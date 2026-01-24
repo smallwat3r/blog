@@ -137,6 +137,14 @@ a.back {
   font-style: normal;
   font-weight: bold;
 }
+.footer-section {
+  margin-top: 1em;
+  padding-top: 1em;
+  border-top: 1px solid var(--color-border);
+}
+.footer-section footer {
+  margin-top: 0.5em;
+}
 @media (min-width: 768px) {
   body {
     font-size: 17px;

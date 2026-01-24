@@ -32,6 +32,7 @@ body.index .container {
 .index h1 {
   margin: 0 0 1em 0;
   font-size: 18px;
+  padding-right: 4em;
 }
 .index ul {
   list-style: none;
@@ -51,14 +52,6 @@ body.index .container {
 .index .links {
   margin: 0;
 }
-.index .footer-section {
-  margin-top: 1em;
-  padding-top: 1em;
-  border-top: 1px solid var(--color-border);
-}
-.index .footer-section footer {
-  margin-top: 0.5em;
-}
 @media (min-width: 400px) {
   .index h1 {
     font-size: 22px;
@@ -72,21 +65,30 @@ body.index .container {
   }
 }
 @media (min-width: 768px) {
+  .index h1 {
+    padding-right: 0;
+  }
   .index li .date {
     font-size: 17px;
   }
 }
 
 /* About page */
+body.about {
+  height: 100%;
+  min-height: 0;
+}
+body.about .container {
+  max-width: 750px;
+  height: 100%;
+  min-height: 0;
+}
+.about .footer-section {
+  margin-top: auto;
+}
 .about pre {
   white-space: pre-wrap;
   overflow-wrap: break-word;
   width: 100%;
-  margin: 0;
-}
-@media (min-width: 768px) {
-  .about .container {
-    margin-left: 60px;
-    max-width: 690px;
-  }
+  margin: 0 0 2em 0;
 }

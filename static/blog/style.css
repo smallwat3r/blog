@@ -6,6 +6,7 @@
 h1 {
   font-size: 22px;
   margin-bottom: 0.5em;
+  padding-right: 4em;
 }
 h2 {
   font-size: 20px;
@@ -93,6 +94,9 @@ main, article {
 @media (min-width: 768px) {
   .back-link {
     margin-bottom: 0;
+  }
+  h1 {
+    padding-right: 0;
   }
   .date {
     font-size: 17px;
