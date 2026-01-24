@@ -1,0 +1,374 @@
+---
+title: QMK keymap for the Smallcat
+description: A deep dive into my QMK configuration for the Smallcat, a 26-key keyboard. Covers layers, combos, tap-hold, chordal hold, and custom features.
+date: 2026-01-23T19:45
+lastmod: 2026-01-24T16:33
+---
+
+The [Smallcat](https://github.com/smallwat3r/smallcat) is a 26-key keyboard I
+designed. Named after my cat Lila, who acts as a muse through a silkscreen on
+the PCB, it\'s a diodeless, column-staggered keyboard using low-profile Choc
+switches.
+
+It comes in two versions: split (two RP2040-Zero controllers connected via TRRS)
+and unibody (single RP2040 Pro Micro).
+
+26 keys is not a lot. To make it work, the [QMK
+keymap](https://github.com/smallwat3r/qmk-keymap) relies heavily on layers,
+combos, and tap-hold keys. This post walks through some of the interesting
+design choices.
+
+## The layout
+
+The letter arrangement is heavily customized for my workflow and optimized for
+English. I started with [Colemak-DH](https://colemakmods.github.io/mod-dh/),
+then moved to [Canary](https://github.com/Apsu/Canary), then
+[Graphite](https://github.com/rdavison/graphite-layout). Eventually I decided to
+create my own layout, borrowing ideas from all three.
+
+The layout prioritizes minimizing pinky strain. Every key on the home row and
+bottom row does double duty through tap-hold:
+
+```
+     +----+----+----+                    +----+----+----+
+     | L  | D  | P  |                    | F  | O  | U  |
++----+----+----+UNI-+----+          +----+----+----+----+----+
+| W  | R  | T  | S  | G  |          | Y  | N  | A  | E  | I  |
++LSft+SYM2+NUM-+NAV-+ROS-+          +----+SYS-+----+SYM2+RSft+
+     | K  | M  | C  |                    | H  | ,  | .  |
+     +LCtl+LAlt+LGui+                    +RGui+RAlt+RCtl+
+               +----+----+    +----+----+
+               |Tab |Spc |    |Bsp |Ent |
+               +EDIT+FUN-+    +SYS-+SYM-+
+```
+
+Holding a key activates its layer. Tapping types the letter. This is achieved
+through QMK\'s `LT()` and `MT()` macros:
+
+```
+#define K_LH2 LT(SYM2, KC_R)  // hold: SYM2 layer, tap: R
+#define K_LH3 LT(NUM, KC_T)   // hold: NUM layer, tap: T
+#define K_LB1 MT(MOD_LCTL, KC_K)  // hold: Ctrl, tap: K
+```
+
+The keymap has 11 (!) layers total. Here\'s what each one does:
+
+- **NUM** (hold [T]{.kbd}), number pad on the right hand with 0-9, a triple zero
+  for large numbers, and decimal/comma.
+- **SYM** (hold [Enter]{.kbd}), symbols like @, \$, %, =, and programming
+  operators. The arrow operator (-\>) lives here too.
+- **SYM2** (hold [R]{.kbd} or [E]{.kbd}), same symbols as SYM but with home row
+  letters passed through, allowing fast rolls without fighting the layer system.
+- **NAV** (hold [S]{.kbd}), arrow keys, brackets, and Home/End navigation.
+- **NAV2** (hold [S]{.kbd} + [T]{.kbd}), word-level navigation and selection.
+  Move by word, select words forward/backward, select entire lines.
+- **EDIT** (hold [Tab]{.kbd}), clipboard operations (cut, copy, paste, undo,
+  redo), find, and select all.
+- **FUN** (hold [Space]{.kbd}), function keys F1-F12. F10-F12 are accessed via
+  combos on F7-F9.
+- **SYS** (hold [N]{.kbd} or [Backspace]{.kbd}), mouse control, media playback,
+  volume, brightness, and zoom.
+- **ROS** (hold [G]{.kbd}), a specialized layer for controlling robots via ROS2
+  teleop_twist_keyboard.
+- **UNI** (hold [P]{.kbd}), French accented characters and special symbols like
+  guillemets.
+
+Some layers have multiple access points. SYS can be activated by holding
+[N]{.kbd} (home row) or [Backspace]{.kbd} (thumb). SYM2 can be activated by
+holding [R]{.kbd} or [E]{.kbd}. This flexibility means you can choose whichever
+finger is free, and it makes certain key combinations more comfortable depending
+on which hand is doing the work.
+
+## Modular layer definitions
+
+With 11 layers, keeping the keymap maintainable is important. The config uses a
+macro-based system that splits each layer into left and right hand definitions,
+making it easy to reason about and modify.
+
+Each layer is defined as 8 small macros, one per hand and row:
+
+```
+// BASE layer: left hand
+#define BASE_L_TOP   K_LT1, K_LT2, K_LT3
+#define BASE_L_HOME  K_LH1, K_LH2, K_LH3, K_LH4, K_LH5
+#define BASE_L_BOT   K_LB1, K_LB2, K_LB3
+#define BASE_L_THUMB K_LTH1, K_LTH2
+
+// BASE layer: right hand
+#define BASE_R_TOP   K_RT1, K_RT2, K_RT3
+#define BASE_R_HOME  K_RH1, K_RH2, K_RH3, K_RH4, K_RH5
+#define BASE_R_BOT   K_RB1, K_RB2, K_RB3
+#define BASE_R_THUMB K_RTH1, K_RTH2
+```
+
+A `LAYER_DEF` macro assembles these parts into a full layer:
+
+```
+#define LAYOUT_wrapper(...) LAYOUT(__VA_ARGS__)
+#define LAYER_DEF(layer) LAYOUT_wrapper( \
+    layer##_L_TOP,   layer##_R_TOP, \
+    layer##_L_HOME,  layer##_R_HOME, \
+    layer##_L_BOT,   layer##_R_BOT, \
+    layer##_L_THUMB, layer##_R_THUMB \
+)
+```
+
+The `##` token pasting operator concatenates the layer name with each suffix. So
+`LAYER_DEF(BASE)` expands to use `BASE_L_TOP`, `BASE_R_TOP`, and so on. The
+keymap array becomes concise:
+
+```
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+    [BASE] = LAYER_DEF(BASE),
+    [NUM]  = LAYER_DEF(NUM),
+    [SYM]  = LAYER_DEF(SYM),
+    // ... and so on
+};
+```
+
+This pattern has a few nice properties. First, you can reuse parts across
+layers. The SYM2 layer shares most keys with SYM:
+
+```
+#define SYM2_L_TOP  SYM_L_TOP   // reuse SYM's top row
+#define SYM2_L_BOT  SYM_L_BOT   // reuse SYM's bottom row
+#define SYM2_L_HOME S(KC_8), KC_R, KC_AMPR, KC_PIPE, S(KC_5)  // custom
+```
+
+Second, the key aliases follow a naming convention that makes the layout
+self-documenting. `K_LH2` means \"left hand, home row, 2nd key\". `K_RT3` means
+\"right hand, top row, 3rd key\". The pattern is `K_[L|R][T|H|B|TH][1-5]` where
+T is top, H is home, B is bottom, and TH is thumb. This makes it easy to reason
+about key positions without counting indices.
+
+These aliases also encode modifiers and layer-taps at the key level, not the
+layer level. This keeps layer definitions clean and ensures combos work
+consistently since they reference positions, not raw keycodes:
+
+```
+#define K_LH1 MT(MOD_LSFT, KC_W)   // hold: Shift, tap: W
+#define K_LH2 LT(SYM2, KC_R)       // hold: SYM2, tap: R
+#define K_LTH1 LT(EDIT, KC_TAB)    // hold: EDIT, tap: Tab
+```
+
+Adding a new layer means defining 8 small macros and one `LAYER_DEF` line. The
+same definitions work across both Smallcat variants (split and unibody) since
+they share the same `smallwat3r.c` file.
+
+## Combos for missing keys
+
+With only 26 keys, several letters are missing: [Z]{.kbd}, [Q]{.kbd}, [B]{.kbd},
+[X]{.kbd}, [V]{.kbd}, [J]{.kbd}, some of the [least used in
+English](https://en.wikipedia.org/wiki/Letter_frequency). [B]{.kbd} and
+[V]{.kbd} are more common, but their combos are near the home row for easy
+access, and the [V]{.kbd} combo feels natural. Combos are mostly positioned on
+keys that don\'t repeat, to avoid accidental activations. Combos are defined in
+`combos.def`, a special file that QMK preprocesses to generate the boilerplate
+code for each combo automatically. Here is an example:
+
+```
+COMB(C_BL_Z, KC_Z, K_LT1, K_LT2, K_LT3)  // L+D+P = Z
+COMB(C_BL_Q, KC_Q, K_LT2, K_LT3)         // D+P = Q
+COMB(C_BL_B, KC_B, K_LH2, K_LH3)         // R+T = B
+// ...
+```
+
+Beyond missing letters, combos handle common digraphs and text shortcuts:
+
+```
+SUBS(C_BL_TH, "th", K_LH3, K_LH4)         // T+S = "th"
+SUBS(C_BL_WH, "wh", K_LH1, K_LH4)         // W+S = "wh"
+SUBS(C_BR_ING, "ing", K_RH2, K_RH5)       // N+I = "ing"
+SUBS(C_BL_WC, ".com", K_LH1, K_LB3)       // W+C = ".com"
+SUBS(C_BL_WP, "@gmail.com", K_LH1, K_LT3) // W+P = "@gmail.com"
+// ...
+```
+
+Brackets also live on combos, positioned to mirror each other:
+
+```
+L+P = [    F+U = ]
+K+C = (    H+. = )
+```
+
+## The SYM2 layer trick
+
+One subtle problem with layer-tap keys: if you hold [R]{.kbd} to access SYM2 and
+then tap [E]{.kbd} for a symbol, you can\'t \"roll\" through [R]{.kbd}-[E]{.kbd}
+quickly because releasing [R]{.kbd} first would cancel the layer.
+
+The solution is SYM2, a symbol layer that passes through the home row letters.
+When you hold [R]{.kbd} and tap [A]{.kbd}, you get lowercase \'a\', not a
+symbol:
+
+```
+// SYM2: symbols with home row passthrough for rolls
+#define SYM2_R_HOME S(KC_1), S(KC_SCLN), KC_A, KC_E, S(KC_BSLS)
+```
+
+This allows fast typing without fighting the layer system.
+
+## Custom tap-hold behavior
+
+Some keys need special tap-hold logic that QMK doesn\'t provide out of the box.
+The [R]{.kbd}+[S]{.kbd} combo is a good example:
+
+- Tap: types \"sh\"
+- Hold: activates Ctrl+Gui (useful for window management)
+
+<!-- -->
+
+```
+case MK_RS:
+    tap_hold_state.keycode = keycode;
+    tap_hold_state.time = record->event.time;
+    register_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LGUI));
+    return false;
+```
+
+On release, the elapsed time determines whether it was a tap or hold:
+
+```
+case MK_RS:
+    unregister_mods(MOD_BIT(KC_LCTL) | MOD_BIT(KC_LGUI));
+    if (is_tap) SEND_STRING("sh");
+    break;
+```
+
+## Chordal hold
+
+A common frustration with home-row mods is accidental activation when typing
+quickly. QMK\'s chordal hold feature helps, it only triggers a hold if the next
+key is on the opposite hand:
+
+```
+const char chordal_hold_layout[MATRIX_ROWS][MATRIX_COLS] PROGMEM =
+    LAYOUT(
+             'L', 'L', 'L',            'R', 'R', 'R',
+        'L', 'L', 'L', 'L', 'L',  'R', 'R', 'R', 'R', 'R',
+             'L', 'L', 'L',            'R', 'R', 'R',
+                       '*', '*',  '*', '*'
+    );
+```
+
+The `'L'` and `'R'` markers tell QMK which hand each key belongs to. Thumbs are
+marked `'*'` to work with either hand.
+
+## Per-combo timing
+
+Not all combos are equal. Some key pairs are easier to hit together than others.
+The config defines different timing windows:
+
+```
+#define COMBO_TERM 35
+#define COMBO_TERM_RELAXED 50
+#define COMBO_TERM_TIGHT 20
+```
+
+Brackets get tight timing (20ms) because false positives are annoying. Digraphs
+like \"th\" get relaxed timing (50ms) because they\'re typed in sequence:
+
+```
+uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
+    switch (combo_index) {
+        case C_BL_TH:
+        case C_BL_WH:
+            return COMBO_TERM_RELAXED;
+        case C_BL_LBRC:
+        case C_BR_RBRC:
+            return COMBO_TERM_TIGHT;
+        // ...
+    }
+    return COMBO_TERM;
+}
+```
+
+## Unicode for French
+
+The UNI layer (hold [P]{.kbd}) provides French accented characters. QMK\'s
+unicode feature maps key presses to unicode code points:
+
+```
+const uint32_t PROGMEM unicode_map[] = {
+    [UN_E_ACUTE] = 0x00E9,      // é
+    [UN_E_GRAVE] = 0x00E8,      // è
+    [UN_C_CEDILLA] = 0x00E7,    // ç
+    [UN_OE_LIGATURE] = 0x0153,  // œ
+    // ...
+};
+```
+
+The keyboard auto-detects the OS and switches unicode input mode:
+
+```
+switch (detected_os) {
+    case OS_MACOS:
+        set_unicode_input_mode(UNICODE_MODE_MACOS);
+        break;
+    case OS_LINUX:
+        set_unicode_input_mode(UNICODE_MODE_LINUX);
+        break;
+}
+```
+
+## Custom features
+
+The keymap uses several custom features, some written from scratch and some
+adapted from [Pascal Getreuer\'s](https://getreuer.info/posts/keyboards/)
+excellent QMK extensions.
+
+- **OS-aware keys**, common operations like copy, paste, undo, and word
+  navigation use different modifiers on macOS (Cmd) vs Linux/Windows (Ctrl). The
+  `os_keys` feature detects the OS and sends the right shortcut. Covers
+  clipboard, navigation, zoom, find, and more.
+
+```
+  case OS_COPY:
+      OS_TAP(G(KC_C), C(KC_C));  // Cmd+C on Mac, Ctrl+C elsewhere
+  case OS_L_W:
+      OS_REPEAT(A(KC_LEFT), C(KC_LEFT));  // word left
+```
+
+- **Select word**, from Pascal Getreuer\'s collection. Select words and lines
+  with a single key, hold to extend the selection. Handles OS differences
+  internally.
+
+```
+  case MK_SEL_BACK:
+      select_word_register('B');  // select word backward
+  case MK_SEL_LINE:
+      select_word_register('L');  // select entire line
+```
+
+- **Sentence case**, another Getreuer feature. Automatically capitalizes the
+  first letter after sentence-ending punctuation. Useful for prose, toggled off
+  for code.
+
+- **Autocorrect**, QMK\'s built-in feature that fixes common typos as you type.
+  Includes a custom dictionary generated via `make autocorrect`.
+
+- **LED/RGB indicator**, the onboard LED or RGB (depending on the
+  microcontroller) provides visual feedback: solid on for Caps Word, slow blink
+  for One-Shot Shift, double flash when autocorrect applies a correction, and
+  three blinks on startup to indicate connection.
+
+## Light switches
+
+With all these layers and combos, key feel matters. I use Kailh Ambients
+Nocturnal switches, 20g actuation force. They\'re absurdly light, which helps
+when you\'re pressing multiple keys for combos. They\'re also very silent,
+making them suitable for shared workspaces.
+
+::: sep
+\~\~\~
+:::
+
+This keymap is in constant evolution. Being able to shape how I communicate with
+my machine, fully customised and optimised to my workflow, is truly amazing.
+
+## Links
+
+- [Smallcat keyboard](https://github.com/smallwat3r/smallcat), hardware files
+  and build guide
+- [My QMK keymap](https://github.com/smallwat3r/qmk-keymap), full source code
+- [QMK firmware](https://qmk.fm/), the open source keyboard firmware

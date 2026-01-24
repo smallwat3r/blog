@@ -1,0 +1,680 @@
+---
+title: Configuring Doom Emacs
+description: A deep dive into my Doom Emacs configuration. Covers custom modules, Evil keybindings, terminal integration, and various hacks for a productive workflow.
+date: 2026-01-23T09:30
+lastmod: 2026-01-24T16:33
+---
+
+[Doom Emacs](https://github.com/doomemacs/doomemacs) is my daily driver. After
+years of tweaking, my configuration has evolved into something quite personal, a
+blend of Doom\'s sensible defaults and custom modules tailored to my workflow.
+
+This post walks through the interesting parts of my [Doom
+config](https://github.com/smallwat3r/dotfiles/tree/main/base/.doom.d),
+explaining the design decisions and useful hacks I\'ve accumulated.
+
+## Config structure
+
+The configuration lives in `~/.doom.d/` and follows a modular structure:
+
+- `init.el`, module selection
+- `config.el`, main configuration
+- `packages.el`, package declarations
+- `keybindings.el`, all keybindings in one place
+- `autoload/`, lazy-loaded helper functions
+- `modules/`, personal Doom modules
+- `templates/`, file templates
+
+The `init.el` declares which modules to load. Mine starts with personal modules
+(prefixed `:smallwat3r`), then Doom\'s built-in modules:
+
+```
+(doom! :smallwat3r
+       claude
+       csv
+       debug
+       dired
+       docker
+       elfeed-ext
+       evil-ext
+       filetypes
+       git-ext
+       google
+       highlighting
+       mail-ext
+       modeline
+       org-ext
+       python-ext
+       slack
+       tools
+       terminal
+
+       :completion
+       (corfu +orderless +icons +dabbrev)
+       (vertico +icons)
+
+       :tools
+       (lsp +eglot +booster)
+       (magit +forge)
+       ;; ...
+       )
+```
+
+This approach keeps the main config clean. Each personal module is
+self-contained with its own `config.el` and optional `packages.el`. Custom
+functions are prefixed with `my/` and variables with `my-`, making them easy to
+identify and avoiding conflicts with other packages.
+
+## Personal modules
+
+Doom Emacs is built around a module system. Modules are self-contained units
+that bundle packages, configuration, and keybindings for a specific feature or
+language. You can enable or disable them in `init.el`, and Doom ships with
+dozens covering everything from programming languages to email clients. But the
+real power is that you can write your own modules following the same structure.
+
+My personal modules live in `modules/smallwat3r/`. Each handles a specific
+concern. The ones ending in `-ext` are extensions of existing Doom modules:
+
+- **claude**, Claude CLI integration via vterm
+- **evil-ext**, Evil mode customizations and cursor colors
+- **git-ext**, Magit tweaks and SSH options for Git
+- **terminal**, vterm configuration and TRAMP helpers
+- **modeline**, custom mode-line with buffer count and search counter
+- **highlighting**, line numbers, rainbow delimiters, symbol overlay
+- **debug**, a minor mode that echoes command names for debugging
+- **python-ext**, Python-specific tooling (formatters, debugger, f-string
+  toggle)
+- **tools**, misc utilities
+- etc\...
+
+## Visual configuration
+
+A core principle of my config is reducing visual clutter. Simple colors, a
+minimal mode-line, a stripped-down dashboard. Everything is designed to stay out
+of the way and let the code be the focus.
+
+I use a custom theme called
+[creamy](https://github.com/smallwat3r/emacs-creamy-theme), a warm, minimal
+theme designed to reduce visual noise and make long coding sessions easier on
+the eyes. It softens the harsh edges of typical syntax highlighting by stripping
+away excess color, leaving only the essential elements subtly emphasized. The
+result is a calm, focused editing experience, gentle on the eyes, yet readable
+and expressive where it counts. The font is [Triplicate A
+Code](https://mbtype.com/fonts/triplicate/), a proportional monospace font
+that\'s surprisingly readable for code.
+
+Font configuration handles multiple scenarios, daemon mode, different operating
+systems, and fallbacks when fonts aren\'t installed:
+
+```
+(defun my/safe-font (fonts &rest spec)
+  "Return a font-spec using the first available font in FONTS."
+  (let ((available
+         (seq-find (lambda (f)
+                     (if (my/font-available-p f) t
+                       (message "Warning: font not found: %s" f) nil))
+                   fonts)))
+    (when available
+      (apply #'font-spec :family available spec))))
+
+;; Pick font based on OS, with fallback
+(setq doom-font
+      (cond
+       (IS-GPD
+        (my/safe-font '("MonacoB" "Monospace") :size size))
+       ((eq system-type 'gnu/linux)
+        (my/safe-font '("Triplicate A Code" "MonacoB" "Monospace") :size size))
+       ;; ...
+       ))
+```
+
+The `IS-GPD` constant detects if I\'m running on a GPD Pocket (a tiny laptop),
+which needs different font sizes.
+
+The dashboard is minimal, just a \"MAIN BUFFER\" heading with system info. It
+serves as a stable anchor point:
+
+```
+(defun my/dashboard-message ()
+  (insert (concat "MAIN BUFFER\n"
+                  my-title-emacs-version
+                  " on " my-system-distro " (" my-system-os ")\n"
+                  "Built for: " system-configuration)))
+
+(setq +doom-dashboard-functions '(my/dashboard-message))
+```
+
+The mode-line is tailored to be simple and easy on the eye. It shows buffer
+count, useful for knowing how many files you have open:
+
+```
+'(:eval (format "  b(%s)" (my/number-of-buffers)))
+```
+
+Line numbers get colorized every 5th line, making it easy to estimate jump
+distances when using relative line numbers:
+
+```
+(setq display-line-numbers-minor-tick 5
+      display-line-numbers-major-tick 5)
+
+(custom-set-faces!
+  '(line-number-minor-tick :foreground "orange" :weight bold))
+```
+
+## Evil mode customization
+
+Evil mode (Vim emulation) gets several tweaks. Cursor colors indicate the
+current state at a glance:
+
+```
+(setq evil-default-state-cursor  '(box "cyan3")
+      evil-normal-state-cursor   '(box "cyan3")
+      evil-insert-state-cursor   '(bar "green3")
+      evil-visual-state-cursor   '(box "OrangeRed2")
+      evil-replace-state-cursor  '(hbar "red2")
+      evil-operator-state-cursor '(box "red2"))
+```
+
+I use a [non-standard keyboard layout](qmk-keymap-smallcat.html), so many
+bindings have duplicates that work on both QWERTY and my layout. For example,
+window navigation:
+
+```
+;; Standard QWERTY
+"wh" #'evil-window-left
+"wj" #'evil-window-down
+"wk" #'evil-window-up
+"wl" #'evil-window-right
+
+;; Custom layout equivalents
+"wy" #'evil-window-left
+"wn" #'evil-window-down
+"wa" #'evil-window-up
+"we" #'evil-window-right
+```
+
+## Keybindings philosophy
+
+All keybindings live in `keybindings.el`, loaded at the end of `config.el`. This
+ensures they\'re applied last and makes them easy to find.
+
+Module-specific bindings are guarded by `modulep!` checks, so they only load
+when the module is active:
+
+```
+(when (modulep! :smallwat3r terminal)
+  (map!
+   :leader
+   (:prefix "o"
+    :desc "Terminal"             "1" #'my/terminal-here
+    :desc "Vterm at root"        "T" #'+vterm/here
+    :desc "Toggle vterm at root" "t" #'+vterm/toggle
+    ;; ...
+    )))
+```
+
+Some bindings use semicolon as a prefix for quick file operations:
+
+- [;d]{.kbd}, save and close buffer
+- [;w]{.kbd}, save buffer
+- [;q]{.kbd}, close without saving
+
+Insert mode gets arrow key equivalents on [C-h/j/k/l]{.kbd}, making small
+movements possible without leaving insert mode:
+
+```
+:map evil-insert-state-map
+"C-h" #'evil-backward-char
+"C-l" #'evil-forward-char
+"C-k" #'evil-previous-line
+"C-j" #'evil-next-line
+```
+
+## Terminal integration and TRAMP
+
+The terminal module configures [vterm](https://github.com/akermu/emacs-libvterm)
+and TRAMP for remote file access.
+
+## a. SSH config parsing
+
+TRAMP is configured to parse multiple SSH config files for host completion:
+
+```
+(defvar my-ssh-config-files
+  '("~/.ssh/config"
+    "~/.ssh/work"
+    "~/.ssh/private")
+  "List of SSH config files for TRAMP completion.")
+
+(tramp-set-completion-function
+ "ssh"
+ (append
+  (mapcar (lambda (f)
+            (list 'tramp-parse-sconfig (expand-file-name f)))
+          my-ssh-config-files)
+  '((tramp-parse-sconfig "/etc/ssh_config")
+    (tramp-parse-shosts "/etc/hosts")
+    (tramp-parse-shosts "~/.ssh/known_hosts"))))
+```
+
+## b. Quick SSH connection
+
+[SPC o .]{.kbd} prompts with `read-file-name` starting at `/ssh:`, triggering
+TRAMP\'s completion with all configured hosts:
+
+```
+(defun my/open-remote-conn ()
+  "Open remote SSH connection with Tramp."
+  (interactive)
+  (find-file (read-file-name "Pick target: " "/ssh:")))
+```
+
+## c. TRAMP optimizations
+
+TRAMP can be slow out of the box. These settings help:
+
+```
+;; Reuse SSH ControlMaster connections
+(setq tramp-use-ssh-controlmaster-options nil)
+
+;; Cache remote file properties longer
+(setq remote-file-name-inhibit-cache nil)
+
+;; Disable VC checks on remote files
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
+```
+
+## d. Remote file editing from shell
+
+When opening vterm on a remote TRAMP connection, a hook injects an `e` shell
+function to open remote files from the remote shell in a local Emacs buffer:
+
+```
+# From remote shell:
+$ e .bashrc      # Opens /ssh:user@host:.bashrc in Emacs
+$ e src/main.rs  # Relative paths work too
+```
+
+A helper extracts the TRAMP prefix from the current connection:
+
+```
+(defun my/vterm-tramp-base-path ()
+  "Return the Tramp prefix without the directory."
+  (let* ((vec (or (car (tramp-list-connections))
+                  (when (tramp-tramp-file-p default-directory)
+                    (tramp-dissect-file-name default-directory))))
+         (method (and vec (tramp-file-name-method vec)))
+         (user   (and vec (tramp-file-name-user vec)))
+         (host   (and vec (tramp-file-name-host vec))))
+    (when (and method host)
+      (format "/%s:%s%s" method
+              (if (and user (not (string-empty-p user)))
+                  (concat user "@") "")
+              host))))
+```
+
+The hook injects the `e` function using vterm\'s OSC 51 escape sequence:
+
+```
+(defun my/vterm-buffer-hooks-on-tramp ()
+  "Set up vterm for remote Tramp connections."
+  (when (and (eq major-mode 'vterm-mode)
+             default-directory
+             (file-remote-p default-directory))
+    (let ((tramp-base-path (my/vterm-tramp-base-path)))
+      (rename-buffer (format "*vterm@%s*" tramp-base-path) t)
+      (vterm-send-string
+       (format
+        "e() { local f=\"$1\"; [[ \"$f\" != /* ]] && f=\"$PWD/$f\"; \
+printf '\\033]51;Efind-file %s:%%s\\007' \"$f\"; }\n"
+        tramp-base-path)))
+    (vterm-send-string "clear\n")))
+
+(add-hook! 'vterm-mode-hook #'my/vterm-buffer-hooks-on-tramp)
+```
+
+The injected `e` function works as follows: it takes a filename argument and
+checks if it\'s a relative path (doesn\'t start with `/`). If relative, it
+prepends `$PWD` to make it absolute. Then it emits an
+[OSC](https://en.wikipedia.org/wiki/ANSI_escape_code#OSC) (Operating System
+Command) escape sequence that vterm intercepts.
+
+The sequence `\033]51;E...;\007` is vterm\'s custom protocol: `\033]` starts the
+OSC, `51` is vterm\'s command code, `E` means \"evaluate elisp\", and `\007`
+terminates. So `printf '\033]51;Efind-file /ssh:host:/path\007'` tells vterm to
+run `(find-file "/ssh:host:/path")` in Emacs. The TRAMP prefix is baked into the
+function when it\'s injected, so paths automatically resolve to the remote host.
+
+## Claude CLI integration
+
+The `claude` module provides integration with [Claude
+Code](https://claude.ai/claude-code) (the CLI tool). It runs Claude sessions
+inside [vterm](https://github.com/akermu/emacs-libvterm) buffers, giving a full
+terminal experience with proper rendering of Claude\'s output. Sessions are
+tracked per project, allowing multiple concurrent chats.
+
+Creating a new session spawns a vterm buffer and runs the `claude` command. The
+buffer is named with the project and session number:
+
+```
+(defun my/claude-new (&optional dir)
+  "Start a new Claude session in DIR."
+  (interactive)
+  (let* ((dir (or dir default-directory))
+         (root (or (doom-project-root dir) dir))
+         (num (1+ (length (my/claude--get-buffers root))))
+         (name (format "*claude:%s:%d*"
+                       (file-name-nondirectory (directory-file-name root))
+                       num))
+         (default-directory dir))
+    (let ((buf (vterm name)))
+      (with-current-buffer buf
+        (vterm-send-string "claude\n"))
+      (my/claude--register-buffer root buf)
+      buf)))
+```
+
+The module provides functions to send code to Claude.
+`my/claude-send-region-with-context` wraps the selection with filename and line
+number, giving Claude more context about where the code lives:
+
+```
+(defun my/claude-send-region-with-context (beg end)
+  "Send region to Claude with file context."
+  (interactive "r")
+  (let* ((file (or (buffer-file-name) (buffer-name)))
+         (line (line-number-at-pos beg))
+         (code (buffer-substring-no-properties beg end))
+         (text (format "From %s:%d\n\n```\n%s\n```" file line code)))
+    (my/claude-send-string text)))
+```
+
+`my/claude-send-region-with-prompt` prepends a prompt prefix from a customizable
+list of common operations:
+
+```
+(defcustom my-claude-prompt-prefixes
+  '("Explain this code"
+    "Review this code"
+    "Find bugs in this code"
+    "Refactor this code"
+    "Add tests for this code"
+    "Document this code")
+  "List of prompt prefixes.")
+
+(defun my/claude-send-region-with-prompt (beg end)
+  "Send region to Claude with a prompt prefix."
+  (interactive "r")
+  (let* ((prefix (completing-read "Prompt: " my-claude-prompt-prefixes nil t))
+         (code (buffer-substring-no-properties beg end))
+         (text (format "%s:\n\n```\n%s\n```" prefix code)))
+    (my/claude-send-string text)))
+```
+
+Other functions handle session switching, toggling visibility, and sending the
+current buffer or region directly.
+
+## Git and Magit extensions
+
+Magit gets several quality-of-life improvements. First, the [h]{.kbd} and
+[l]{.kbd} keys are unbound so they work for cursor movement in Evil mode:
+
+```
+(define-key magit-mode-map (kbd "l") nil)
+(define-key magit-mode-map (kbd "h") nil)
+```
+
+After committing, all `COMMIT_EDITMSG` buffers are killed automatically,
+including duplicates that accumulate when working with multiple repositories:
+
+```
+(add-hook! 'git-commit-post-finish-hook
+  (dolist (buf (buffer-list))
+    (when (string-prefix-p "COMMIT_EDITMSG" (buffer-name buf))
+      (kill-buffer buf))))
+```
+
+Git SSH commands from Emacs use custom options to improve reliability - forcing
+IPv4, setting timeouts, and detecting dropped connections:
+
+```
+(setenv "GIT_SSH_COMMAND" "ssh -4 \
+  -o ConnectTimeout=10 \
+  -o ServerAliveInterval=20 \
+  -o ServerAliveCountMax=3 \
+  -o TCPKeepAlive=yes \
+  -o GSSAPIAuthentication=no \
+  -o ControlMaster=no")
+```
+
+Interactive rebase gets [J]{.kbd}/[K]{.kbd} bindings to move commits up and
+down, matching the rest of Evil\'s directional conventions.
+
+## Programming setup
+
+I use [Eglot](https://github.com/joaotavora/eglot) for LSP instead of lsp-mode.
+It\'s built into Emacs 29+ and requires less configuration. Inlay hints are
+disabled as I find them distracting:
+
+```
+(add-hook! 'eglot-managed-mode-hook (eglot-inlay-hints-mode -1))
+```
+
+Python uses [basedpyright](https://github.com/DetachHead/basedpyright) for type
+checking, with black and isort for formatting:
+
+```
+(set-eglot-client! 'python-mode '("basedpyright-langserver" "--stdio"))
+
+(set-formatter! 'black
+  '("black" "--quiet" "--line-length" "88" "--target-version" "py310" "-")
+  :modes '(python-mode))
+```
+
+A custom function toggles f-string prefixes on Python strings. With the cursor
+inside a string, [SPC m f]{.kbd} adds or removes the `f` prefix:
+
+```
+(defun my/python-toggle-fstring ()
+  "Toggle f-string prefix on the current Python string literal."
+  (interactive)
+  (let* ((ppss (syntax-ppss))
+         (string-start (nth 8 ppss)))
+    (when (nth 3 ppss)  ; inside a string
+      (save-excursion
+        (goto-char string-start)
+        (cond
+         ((memq (char-before string-start) '(?f ?F))
+          (delete-char -1))  ; remove f prefix
+         (t
+          (insert "f")))))))
+```
+
+The [PET](https://github.com/wyuenho/emacs-pet/) package automatically finds the
+correct Python executable for each project, whether it\'s from virtualenv,
+poetry, or pyenv.
+
+Flycheck runs on-demand rather than automatically. I find constant linting
+distracting, so it\'s triggered explicitly when needed:
+
+```
+(remove-hook! 'eglot-managed-mode-hook #'flycheck-eglot-mode)
+(remove-hook! 'doom-first-buffer-hook #'global-flycheck-mode)
+```
+
+## Utility functions
+
+Custom helper functions live in `autoload/`, organized by purpose. Doom
+automatically loads these when called.
+
+## a. Buffer management
+
+From `autoload/buffer.el`:
+
+```
+my/save-and-close-buffer  ; save and kill in one action
+my/kill-buffer            ; kill without prompts for terminals
+my/kill-all-buffers       ; kill everything
+my/kill-all-buffers-except-current
+```
+
+## b. Insertions
+
+From `autoload/insert.el`:
+
+```
+(defun my/insert-timestamp (&optional datetime)
+  "Insert current date or date+time."
+  (interactive "P")
+  (let ((fmt (if datetime "%Y-%m-%d %H:%M" "%Y-%m-%d")))
+    (insert (format-time-string fmt))))
+
+(defun my/insert-email ()
+  "Insert an email address from `my-email-addresses-alist'."
+  (interactive)
+  (let* ((keys (mapcar #'car my-email-addresses-alist))
+         (choice (completing-read "Email: " keys nil t)))
+    (insert (my/get-email choice))))
+```
+
+## c. Process management
+
+From `autoload/process.el`, a fuzzy process killer showing CPU and memory usage:
+
+```
+(defun my/fuzzy-kill-process ()
+  "Fuzzy-pick a system process and send SIGKILL."
+  (interactive)
+  (let* ((fmt-item
+          (lambda (pid)
+            (let ((a (process-attributes pid)))
+              (when a
+                (let* ((name (alist-get 'comm a))
+                       (pcpu (or (alist-get 'pcpu a) 0.0))
+                       (rss  (alist-get 'rss a))
+                       (rss-mb (if (numberp rss) (/ rss 1024.0) 0.0)))
+                  (cons (format "%-20s %6d  %7.1fMB  %5.1f%%"
+                                (or name "?") pid rss-mb pcpu)
+                        pid))))))
+         (items (delq nil (mapcar fmt-item (list-system-processes))))
+         (choice (completing-read "Kill process: " (mapcar #'car items) nil t))
+         (pid (cdr (assoc choice items))))
+    (signal-process pid 'kill)
+    (message "Killed: %s" choice)))
+```
+
+## d. Search helpers
+
+From `autoload/search.el`:
+
+```
+my/find-file-in-dotfiles              ; quick access to dotfiles
+my/where-am-i                         ; show current file path
+my/vertico-search-project-symbol-at-point  ; search symbol under cursor
+```
+
+## e. Window management
+
+From `autoload/window.el`, fine-grained scrolling and resizing, moving 3 lines
+or 5 columns at a time rather than Emacs defaults.
+
+## Useful hacks
+
+## a. Wayland environment propagation
+
+When running Emacs as a daemon under Sway, subprocesses (like Magit\'s git
+hooks) can\'t access Wayland because the daemon started without those
+environment variables. This hook pulls Wayland vars from new emacsclient frames
+into the daemon\'s environment:
+
+```
+(when (and (daemonp) (eq system-type 'gnu/linux))
+  (defun my/update-wayland-env-from-frame ()
+    "Update WAYLAND_DISPLAY and SWAYSOCK from the current frame."
+    (when-let ((runtime-dir (getenv "XDG_RUNTIME_DIR")))
+      (when (directory-files runtime-dir nil "^sway-ipc\\..*\\.sock$")
+        (dolist (var '("WAYLAND_DISPLAY" "SWAYSOCK"))
+          (when-let ((val (getenv var (selected-frame))))
+            (setenv var val))))))
+  (add-hook! 'server-after-make-frame-hook
+             #'my/update-wayland-env-from-frame))
+```
+
+## b. Disabled packages
+
+Several Doom defaults are disabled to reduce bloat or avoid conflicts:
+
+```
+(disable-packages!
+ lsp-python-ms  ; prefer basedpyright
+ pipenv         ; prefer poetry
+ nose           ; prefer pytest
+ lsp-ui         ; prefer eglot's minimal approach
+ solaire-mode   ; interferes with my theme
+ evil-escape)   ; not needed with my custom keyboard
+```
+
+## c. Abbreviations
+
+Quick expansions. Typing `ifn` in Python expands to the main guard pattern,
+`pdb` inserts a debugger breakpoint:
+
+```
+(define-abbrev-table 'python-mode-abbrev-table
+  '(("ifn" "if __name__ == \"__main__\":\n    " nil 0)
+    ("pdb" "import pdb; pdb.set_trace()  # debug" nil 0)
+    ("shb" "#!/usr/bin/env python3\n" nil 0)))
+```
+
+## d. Buffer management helpers
+
+Handle common operations that Emacs makes awkward. Killing a vterm buffer
+normally prompts about the running process, this wrapper suppresses that:
+
+```
+(defun my/kill-buffer (&optional buffer)
+  "Kill current buffer without prompts for term/vterm/eshell."
+  (interactive)
+  (let ((buf (or buffer (current-buffer))))
+    (with-current-buffer buf
+      (when (derived-mode-p 'vterm-mode 'term-mode 'eshell-mode)
+        (set-buffer-modified-p nil)
+        (when-let ((proc (get-buffer-process buf)))
+          (set-process-query-on-exit-flag proc nil))))
+    (kill-buffer buf)))
+```
+
+## e. Custom themes
+
+I maintain two Emacs themes -
+[creamy](https://github.com/smallwat3r/emacs-creamy-theme) and
+[simplicity](https://github.com/smallwat3r/emacs-simplicity-theme). They\'re
+loaded from GitHub via Doom\'s package system:
+
+```
+(package! creamy-theme
+  :recipe (:host github :repo "smallwat3r/emacs-creamy-theme"))
+```
+
+::: sep
+\~\~\~
+:::
+
+This configuration represents years of incremental refinement. The modular
+structure makes it easy to enable or disable features without breaking
+everything, and keeping keybindings in a single file makes them discoverable.
+Emacs rewards investment, the more you shape it to your workflow, the more it
+becomes an extension of thought rather than a tool you fight against.
+
+## Links
+
+- [My dotfiles](https://github.com/smallwat3r/dotfiles), full configuration
+  including Doom Emacs
+- [Doom Emacs](https://github.com/doomemacs/doomemacs), the Emacs distribution
+- [Creamy theme](https://github.com/smallwat3r/emacs-creamy-theme), the warm,
+  paper-like theme

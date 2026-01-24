@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block description %}{{index.description}}{% endblock %}
+{% block canonical %}https://smallwat3r.com/{% endblock %}
+{% block title %}{{index.title}}{% endblock %}
+
+{% block meta %}
+    <meta property="og:title" content="{{index.title}}">
+    <meta property="og:description" content="{{index.description}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://smallwat3r.com/">
+{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Matt Petiteau",
+      "url": "https://smallwat3r.com",
+      "email": "matt@smallwat3r.com",
+      "sameAs": [
+        "https://github.com/smallwat3r",
+        "https://www.linkedin.com/in/matthieupetiteau"
+      ]
+    }
+    </script>
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="index.css">
+{% endblock %}
+
+{% block body_class %} class="index"{% endblock %}
+
+{% block body %}
+    <div class="container">
+    <div class="about-link"><a href="about.html">about</a></div>
+{{index.body}}
+    <ul>
+{% for post in posts %}
+      <li><a href="{{ post.path }}">{{ post.title }}</a> <span class="date">{{ post.date | date_display }}</span></li>
+{% endfor %}
+    </ul>
+    <div class="footer-section">
+      <div class="links">
+        <a href="https://github.com/smallwat3r">Github</a> ·
+        <a href="https://www.linkedin.com/in/matthieupetiteau">LinkedIn</a> ·
+        <a href="mailto:matt@smallwat3r.com">Email</a> ·
+        <a href="./keys/matt@smallwat3r.com.asc">PGP</a> ·
+        <a href="/feed.xml">RSS</a>
+      </div>
+      <footer>© {{year}} smallwat3r</footer>
+    </div>
+    </div>
+{% endblock %}

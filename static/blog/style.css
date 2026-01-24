@@ -1,0 +1,100 @@
+@import url('../style.css');
+
+.back-link {
+  margin-bottom: 0.5em;
+}
+h1 {
+  font-size: 22px;
+  margin-bottom: 0.5em;
+}
+h2 {
+  font-size: 20px;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+.date {
+  color: var(--color-text-muted);
+  font-size: 16px;
+  font-style: italic;
+  margin-bottom: 1.5em;
+}
+h2 a.anchor {
+  font-weight: normal;
+  margin-right: 0.3em;
+  opacity: 0.4;
+}
+h2 a.anchor:hover {
+  opacity: 1;
+}
+p {
+  line-height: 1.6;
+  margin-bottom: 1em;
+}
+pre {
+  background-color: var(--color-code-bg);
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+  font-size: 16px;
+  line-height: 1.4;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+code {
+  font-size: 16px;
+  background-color: var(--color-code-bg);
+  padding: 0.1em 0.3em;
+}
+pre code {
+  padding: 0;
+}
+.pre-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+.copy-btn {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.pre-wrapper:hover .copy-btn {
+  opacity: 1;
+}
+kbd {
+  font-size: 16px;
+  background-color: var(--color-border);
+  border: 1px solid var(--color-scrollbar-hover);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+  box-shadow: 0 1px 0 var(--color-scrollbar-hover);
+}
+ul, ol {
+  line-height: 1.4;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+li {
+  margin-bottom: 0.2em;
+}
+main, article {
+  max-width: 750px;
+  width: 100%;
+}
+.sep {
+  text-align: center;
+  color: var(--color-text-muted);
+  margin: 2em 0;
+  letter-spacing: 0.3em;
+}
+@media (min-width: 768px) {
+  .back-link {
+    margin-bottom: 0;
+  }
+  .date {
+    font-size: 17px;
+  }
+}

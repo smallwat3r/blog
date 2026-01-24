@@ -1,0 +1,75 @@
+==================================================================
+https://keybase.io/smallwat3r
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://smallwat3r.com
+  * I am smallwat3r (https://keybase.io/smallwat3r) on keybase.
+  * I have a public key with fingerprint 1911 18D4 B179 9582 3FC1  83DF 88B1 2B94 C31D D53E
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0120649e55a23636fdd8c8ad8cfcaa29b205ddd94f418e06820da4e47d9122b1e0e80a",
+      "fingerprint": "191118d4b17995823fc183df88b12b94c31dd53e",
+      "host": "keybase.io",
+      "key_id": "88b12b94c31dd53e",
+      "kid": "0101ad6a1d468b7df7a6cec01d96a5f145512a4b8a48e96ee41f49c16a92d69aded40a",
+      "uid": "b6b003bdb4a0a7713f91f84d5dc85919",
+      "username": "smallwat3r"
+    },
+    "service": {
+      "hostname": "smallwat3r.com",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "ctime": 1751584753,
+  "expire_in": 157680000,
+  "prev": "d6fa3b69377ccb3063d5a0910fa8e84aa6d6baa27e7714271f34c7c156062336",
+  "seqno": 45,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.1.13
+Comment: https://keybase.io/crypto
+
+yMNvAnicbVJtUFRVGAYEAgalcia0j1m8wpiJds/9vutIkTAMYYrKEM4sLefecy5c
+ZPduuxdwISqZwfzIAYzCgN0xPyBlgNQUBC2NopFNVD5s0hzEPzAQTqggpjndZfJX
+nR/nzHnP8zzned5zfpw/LyAicOfxFTXdrwwlBPouNBQG5OVGTZUSkobchLmU2Irn
+FlyAsEu3blURYSZIQJEcI2KWhRTN0ZyCkCAL0JgUGUJKlCiSRQiJjMIAAZOcQJEI
+MpjhkQgoSgKYxAIJiXhCUe252OlwqnbdkAUiAEBAjAR4UWQFilZkINBIEQQJUJLI
+yDRAiKWxQczTXH6GYU6CLrxK1YyasbHO2fsf/FPfJICIgwAxnCDxSOEhJ2OZBEjk
+IKsAhmUBBRlJgIyARQ5jBiiMKAMOihTiRIgwYuZ8F87JSZxEkrSEJAaSkOcBrYhA
+ERjEIllgRSD6gS7stEMbNtAuGywoKIY67STK4gmjXqTK2N9af5b/YFbJms3gO5ya
+rslagXGWp+sOl9nP1d0OP7gYS9Z/ZaySakdGLw1GEXa6VM1OmIGBlHXVrwt4FrAC
+w7N0PIG3OVQntqp+BMtzAmkM/z24yJBEnAJpiRNpnpdliSY5GrGQFAGpQAELDIQc
+4iTjhXlsxGUoHig0I/MyYDmSo2iaI/zB3rdrhJlhDZ8w159JzbVDvdCJibIfLliC
+AwIjAkJDgvyfLCAi/NmnXy9+U9STNQ9tsWOLaybb6cfegLeS81Jw4p7Pq5TKT90W
+yx1PXEy6HJxKHQm7I/VNOkyptyZXvpFpejNiaePa9epE+PWP6uTGsGW3Nq8NwyuG
+N1bQWnNOx4Lm2T8uPp+5ugWfPhw71rAxUJkc8SxIzWrJvly+v9b6sPrYzuVx9O3m
+r1p2Rw+n9Jl+Gv5M1OZZvtYiXQOpgxNPrvwduiP/y2uRXj3ZsSF0k/X3/talOWXr
+6k+OXf7rXJt2qaQhtCPL+zL5yVR3dOK9vdLM9+fLsqcOgLsbyoWSrv5pU0zQ/dtd
+UvSiM6/qBzz3lk21nsh68Zm6g+VMTULTjuiMs1WH1ofPtJsGZx/1dQbhU9G1U0su
+/frz6CLFUpIHfS7fg4Qv3hbzqzqDrU1xowOWYQH/dsSe6fYt9hz6ZXC2PV3zRKc1
+Fu+tfRAehYZGWr9ZQifZ8jvdqdteiC+/OfDc9JVdZkdvor3/tXftPePnetLSgio8
+9RnirPtqyXTb0evHtYuxldbH89dVnmozB6fse70wrSfpcF26UJO7pdFnj/kutHBm
+4OqZ5VvO936wJ+LbR17W1NLkfe/oRMcx/exQjB4ljvffDcp+qRq94xtrbh0ZT74x
+dv/PzhsZq0Oo7n3dp/csHFarRzeX2j6sLk2q5z/e3utd07W7YmHZweLYm9citwee
+6J8ozRF3ncyp2h+y8h+swsgB
+=wsdP
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/smallwat3r
+
+==================================================================

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="alternate" type="application/rss+xml" title="smallwat3r" href="/feed.xml">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block description %}{% endblock %}">
+    <meta name="author" content="Matt Petiteau">
+    <link rel="canonical" href="{% block canonical %}{% endblock %}">
+{% block meta %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+{% block structured_data %}{% endblock %}
+    <link rel="stylesheet" href="{% block stylesheet %}style.css{% endblock %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body{% block body_class %}{% endblock %}>
+{% block body %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

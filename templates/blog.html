@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block description %}{{post.description}}{% endblock %}
+{% block canonical %}https://smallwat3r.com/blog/{{post.slug}}.html{% endblock %}
+{% block title %}{{post.title}} - smallwat3r{% endblock %}
+
+{% block meta %}
+    <meta property="og:title" content="{{post.title}}">
+    <meta property="og:description" content="{{post.description}}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://smallwat3r.com/blog/{{post.slug}}.html">
+    <meta property="article:published_time" content="{{post.date}}">
+    <meta property="article:author" content="Matt Petiteau">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{post.title}}">
+    <meta name="twitter:description" content="{{post.description}}">
+{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "{{post.title}}",
+      "description": "{{post.description}}",
+      "author": {"@type": "Person", "name": "Matt Petiteau"},
+      "datePublished": "{{post.date}}",
+      "url": "https://smallwat3r.com/blog/{{post.slug}}.html"
+    }
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+    <div class="back-link"><a class="back" href="../index.html">← back</a></div>
+    <article>
+      <h1>{{post.title}}</h1>
+      <div class="date">{{post.date | date_display}}</div>
+
+{{post.body}}
+
+      <p><a class="back" href="../index.html">← back</a></p>
+
+    </article>
+    <footer>© {{year}} smallwat3r</footer>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="blog.js"></script>
+{% endblock %}

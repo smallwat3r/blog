@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block description %}{{page.description}}{% endblock %}
+{% block canonical %}https://smallwat3r.com/{{page.slug}}.html{% endblock %}
+{% block title %}{{page.title}} - smallwat3r{% endblock %}
+
+{% block meta %}
+    <meta property="og:title" content="{{page.title}} - smallwat3r">
+    <meta property="og:description" content="{{page.description}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://smallwat3r.com/{{page.slug}}.html">
+{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Matt Petiteau",
+      "url": "https://smallwat3r.com",
+      "email": "matt@smallwat3r.com",
+      "sameAs": [
+        "https://github.com/smallwat3r",
+        "https://www.linkedin.com/in/matthieupetiteau"
+      ]
+    }
+    </script>
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="index.css">
+{% endblock %}
+
+{% block body_class %} class="about"{% endblock %}
+
+{% block body %}
+    <div class="container">
+    <div class="back-link"><a class="back" href="index.html">← back</a></div>
+
+{{page.body}}
+
+    </div>
+    <footer>© {{year}} smallwat3r</footer>
+{% endblock %}

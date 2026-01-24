@@ -1,0 +1,7 @@
+dist/
+dist.zip
+.build/
+.venv/
+static/fonts/*
+!static/fonts/.gitkeep
+__pycache__/

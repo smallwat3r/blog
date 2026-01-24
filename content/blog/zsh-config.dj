@@ -1,0 +1,513 @@
+---
+title: A modular ZSH setup
+description: A walkthrough of my modular ZSH configuration. Covers performance optimizations, custom prompt with git status, completion system, plugins, and tool-specific helpers.
+date: 2025-12-01T09:15
+lastmod: 2026-01-24T16:33
+---
+
+ZSH has been my shell of choice for a long time. Along the way, my configuration
+has accumulated a collection of hacks, tricks, and quality-of-life improvements.
+This post walks through the interesting parts of my [ZSH
+config](https://github.com/smallwat3r/dotfiles/tree/main/base), focusing on the
+non-obvious bits that make daily shell work smoother.
+
+## Config structure
+
+The configuration is split across multiple files:
+
+- `~/.zshenv`, environment variables, loaded first
+- `~/.zshrc`, main entrypoint for interactive shells
+- `~/.zsh/core/`, core shell settings
+- `~/.zsh/tools/`, tool-specific configs
+- `~/.zsh/functions/`, autoloaded shell functions
+
+Files are numbered to control load order. `10-general.zsh` runs before
+`30-alias.zsh`, and `90-bind-rationalise-dots.zsh` runs last (it needs to
+override the default dot behavior after everything else is loaded).
+
+A loader function iterates through directories and sources files:
+
+```
+load_zsh_dir() {
+  local dir=$1 file
+  [[ -d $dir && -r $dir ]] || return 0
+  for file in "$dir"/*.zsh(N); do
+    [[ -r $file ]] || continue
+    _zsh_compile_if_needed "$file"
+    source "$file"
+  done
+}
+```
+
+Machine-specific overrides, work-related configs, and private settings live in
+`.zshrc.private`, which isn\'t committed to the repository. It\'s loaded last,
+so it can override anything:
+
+```
+# private configs (loaded last)
+[[ -f $HOME/.zshrc.private ]] && source "$HOME/.zshrc.private"
+```
+
+## Hacks and tricks
+
+These are the non-obvious bits that make the shell more pleasant to use. Very
+opinionated to my personal liking, but perhaps useful as inspiration.
+
+## a. Rationalise dots
+
+Typing multiple dots expands into parent directory traversal. Type `...` and get
+`../..`. Type `....` and get `../../..`. No more counting dots or typing
+slashes. Cleaner than the common `alias ..='cd ..'`, `alias ...='cd ../..'`
+pattern, and works with any command, not just cd:
+
+```
+__rationalise-dot() {
+  [[ $LBUFFER = *.. ]] && LBUFFER+=/.. || LBUFFER+=.
+}
+zle -N __rationalise-dot
+bindkey "." __rationalise-dot
+```
+
+This widget intercepts the dot key. If the buffer already ends with `..`, it
+appends `/..` instead of just a dot.
+
+## b. The `$` and `%` aliases
+
+A clever trick that solves two problems at once. These aliases expand to a
+single space:
+
+```
+alias \$=" "
+alias %=" "
+```
+
+**Problem 1:** Copying commands from documentation. When you copy `$ git status`
+from a README, the `$` gets included. With this alias, you can paste directly
+and it works. The `$` expands to a space, and the rest runs normally.
+
+**Problem 2:** Private commands. Combined with `HISTIGNORESPACE`, any command
+starting with a space isn\'t saved to history. So `% export SECRET=xyz` won\'t
+appear in your shell history, and you get a visual indicator that it\'s private.
+Both `$` and `%` work the same way.
+
+## c. Global aliases for piping
+
+Global aliases expand anywhere in a command, not just at the start. They\'re
+shortcuts for common pipe patterns:
+
+```
+alias -g G="| grep"
+alias -g L="| less"
+alias -g H="| head"
+alias -g T="| tail"
+alias -g S="| sort"
+alias -g NE="2> /dev/null"
+
+# clipboard - platform-aware
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  alias -g C="| pbcopy"
+elif command -v wl-copy >/dev/null 2>&1; then
+  alias -g C="| wl-copy"
+else
+  alias -g C="| xclip -selection clipboard"
+fi
+```
+
+Usage: `ps aux G nginx S` expands to `ps aux | grep nginx | sort`. Or
+`cat file C` to copy file contents to clipboard.
+
+## d. Named directories
+
+The `hash -d` builtin creates named directories that work with tilde expansion:
+
+```
+hash -d \
+  d="$HOME/dotfiles" \
+  c="$HOME/code" \
+  dw="$HOME/Downloads" \
+  ssh="$HOME/.ssh" \
+  zsh="$HOME/.zsh" \
+  config="$HOME/.config"
+```
+
+Now `cd ~c` goes to `~/code`, `ls ~ssh` lists your SSH directory, and
+`vim ~d/.zshrc` edits your zsh config. Works everywhere paths are expected.
+
+## e. Auto-generate git aliases
+
+Instead of manually defining shell aliases for git commands, this reads your git
+config and creates `g<alias>` versions automatically:
+
+```
+() {
+  local line key name
+  local git_alias_lines
+
+  git_alias_lines=("${(@f)$(git config --get-regexp '^alias\.' 2>/dev/null)}")
+
+  for line in $git_alias_lines; do
+    key=${line%% *}       # "alias.co"
+    name=${key#alias.}    # "co"
+    alias "g${name}=git ${name}"
+  done
+
+  alias g="git"
+}
+```
+
+If your gitconfig has `[alias] co = checkout`, you automatically get `gco` in
+your shell. Add a new git alias, restart your shell, and the corresponding `g*`
+alias exists.
+
+## f. Edit command line in `$EDITOR`
+
+[Ctrl+e]{.kbd} opens the current command in your editor. Essential for complex
+multi-line commands or fixing a long pipeline:
+
+```
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^e' edit-command-line
+```
+
+## g. Expand aliases before running
+
+[Ctrl+a]{.kbd} expands aliases in place, so you can see what will actually run
+before hitting enter:
+
+```
+zle -C alias-expansion complete-word _generic
+bindkey '^a' alias-expansion
+zstyle ':completion:alias-expansion:*' completer _expand_alias
+```
+
+## h. Safe PATH additions with array subscript flags
+
+ZSH\'s array subscript flags let you check if an element exists before adding
+it. The `(Ie)` flag returns the index of an exact match, or 0 if not found. This
+pattern appears throughout the config for tools like Go, Rust, Emacs, and
+Homebrew packages:
+
+```
+# Only add to PATH if not already present
+if (( ${path[(Ie)$GOPATH/bin]} == 0 )); then
+  path+=("$GOPATH/bin")
+fi
+```
+
+The `I` flag returns the index of the first match, `e` requires an exact string
+match. When the result is 0, the path isn\'t in the array yet. This prevents
+duplicate entries from accumulating when sourcing the config multiple times.
+
+## Custom prompt
+
+I prefer rolling my own prompt over tools like Starship or Oh My Zsh themes.
+Simpler to maintain, no external dependencies, and full control over what it
+displays. The prompt shows error status, optional tag, Python virtualenv,
+directory, and git info:
+
+```
+PROMPT='%(?..%F{red}?%? )$(__tag)$(__is_venv)%f%3~%f$(__git_prompt_segment)%# '
+```
+
+## a. Git status with timeout
+
+The git segment shows branch, dirty state, root marker, and a special PAUSED
+badge. All git commands run with a 500ms timeout to prevent hanging on slow
+filesystems:
+
+```
+__with_timeout() {
+  local timeout_cmd
+  if command -v timeout &>/dev/null; then
+    timeout_cmd="timeout"
+  elif command -v gtimeout &>/dev/null; then
+    timeout_cmd="gtimeout"
+  else
+    "$@"
+    return
+  fi
+  $timeout_cmd 0.5s "$@"
+}
+```
+
+The git segment uses this wrapper for all git calls:
+
+```
+__git_prompt_segment() {
+  local git_status branch dirty root paused
+
+  git_status=$(__with_timeout git status --porcelain=v1 -b 2>/dev/null) || return
+
+  # extract branch, check dirty state, detect root...
+
+  # PAUSED badge if last commit starts with "PAUSED"
+  local subject
+  subject=$(__with_timeout git log -1 --format="%s" 2>/dev/null)
+  if [[ $subject == PAUSED* ]]; then
+    paused=' %B%F{198}%K{52}[PAUSED]%b%f%k'
+  fi
+
+  printf '%s%%F{yellow} (%s%s%s)%%f ' "$paused" "$branch" "$dirty" "$root"
+}
+```
+
+The PAUSED badge is a workflow convention. Before switching contexts, commit
+with a message starting with \"PAUSED\" (e.g., \"PAUSED: working on auth
+refactor\"). The prompt reminds you there\'s incomplete work.
+
+## b. Prompt tags
+
+The `tag` function adds custom text to the prompt:
+
+```
+tag() {
+  _PROMPT_TAG="$1"
+}
+
+__tag() {
+  if [[ -n "${_PROMPT_TAG}" ]]; then
+    echo "%B%F{87}%K{20}[${(U)_PROMPT_TAG}]%b%f%k "
+  fi
+}
+```
+
+Run `tag production` and your prompt shows `[PRODUCTION]` in bright colors.
+Useful when you have multiple terminals open for different environments.
+
+## Performance
+
+## a. Bytecode compilation
+
+ZSH can compile scripts to bytecode (`.zwc` files). The loader compiles files
+automatically when they change:
+
+```
+_zsh_compile_if_needed() {
+  local src=$1 dst="${1}.zwc"
+  [[ -n $src && -r $src ]] || return 1
+  if [[ ! -f $dst || $src -nt $dst ]]; then
+    zcompile "$src" 2>/dev/null
+  fi
+}
+```
+
+## b. Lazy completion initialization
+
+The completion system is expensive to initialize. Instead of running `compinit`
+fully on every startup, the dump is cached:
+
+```
+() {
+  local _zcompdump=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompdump
+  mkdir -p "${_zcompdump:h}" >/dev/null 2>&1
+  if [[ ! -f $_zcompdump ]]; then
+    compinit -d "$_zcompdump"
+  else
+    compinit -C -d "$_zcompdump"  # -C skips security check
+  fi
+}
+```
+
+## c. Conditional tool loading
+
+Each tool config checks if the tool exists before loading:
+
+```
+(( $+commands[docker] )) || return
+```
+
+No errors on machines without certain tools, and no time wasted loading configs
+for tools that aren\'t installed.
+
+## d. Profiling
+
+Set `DEBUG_ZSH_PERF=1` before starting a shell to enable profiling:
+
+```
+if (( ${+DEBUG_ZSH_PERF} )); then
+  zmodload zsh/zprof
+fi
+# ... config loads ...
+if (( ${+DEBUG_ZSH_PERF} )); then
+  zprof
+fi
+```
+
+A `timezsh` function runs multiple shell startups and averages the time:
+
+```
+$ timezsh 10
+run  1:  42 ms
+run  2:  41 ms
+...
+Average: 41 ms
+```
+
+## Completion
+
+Completion settings enable fuzzy matching and a menu interface:
+
+```
+setopt COMPLETE_IN_WORD  # complete from both ends
+setopt AUTO_MENU         # menu after second tab
+setopt ALWAYS_TO_END     # cursor to end after completion
+
+# case-insensitive, partial matching on separators
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' \
+       'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+
+# navigable menu
+zstyle ':completion:*' menu select
+
+# colored feedback
+zstyle ':completion:*:corrections' format '%F{green}-- %d (errors: %e)%f'
+zstyle ':completion:*:warnings' format '%F{magenta}-- no matches found%f'
+```
+
+## Plugins
+
+Three plugins loaded from system locations (no plugin manager):
+
+- **zsh-autosuggestions**, shows history-based suggestions
+- **zsh-syntax-highlighting**, colors commands as you type
+- **zsh-history-substring-search**, search history with arrows
+
+Syntax highlighting is configured to be minimal, with dangerous patterns
+highlighted:
+
+```
+ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=red,bold
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]=fg=yellow
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]=fg=yellow
+
+# Highlight rm and sudo
+ZSH_HIGHLIGHT_REGEXP+=('^rm .*' fg=90,bold)
+ZSH_HIGHLIGHT_REGEXP+=('\bsudo\b' fg=164,bold)
+```
+
+## Tool configs
+
+## a. Git SSH hardening
+
+Git SSH commands use hardened options for reliability:
+
+```
+export GIT_SSH_COMMAND='ssh -4 \
+  -o ConnectTimeout=10 \
+  -o ServerAliveInterval=20 \
+  -o ServerAliveCountMax=3 \
+  -o TCPKeepAlive=yes \
+  -o GSSAPIAuthentication=no \
+  -o ControlMaster=no'
+```
+
+## b. FZF with ripgrep
+
+FZF uses ripgrep as backend and has minimal colors:
+
+```
+bindkey '^W' fzf-history-widget  # Ctrl+W for history
+
+export FZF_DEFAULT_OPTS="
+  --reverse
+  --color=bg:-1,bg+:-1,fg:-1,fg+:-1
+  --color=hl:33,hl+:33
+"
+
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
+```
+
+## c. Python virtualenv activation
+
+A function walks up the directory tree to find and activate the nearest `.venv`:
+
+```
+avenv() {
+  local dir=$PWD
+  while :; do
+    if [[ -f "$dir/.venv/bin/activate" ]]; then
+      echo "Activating virtualenv from $dir/.venv"
+      source "$dir/.venv/bin/activate"
+      return 0
+    fi
+    [[ "$dir" == / ]] && break
+    dir=$(dirname "$dir")
+  done
+  echo "No .venv found" >&2
+  return 1
+}
+```
+
+Helper commands use this automatically:
+
+```
+vpython() { _avenv_ensure && python "$@" }
+vpip()    { _avenv_ensure && pip "$@" }
+vpytest() { _avenv_ensure && pytest "$@" }
+```
+
+## d. Docker helpers
+
+Formatted output and common operations:
+
+```
+dps()    # list running containers, formatted
+dpsa()   # list all containers
+dlog()   # follow container logs
+dexe()   # exec into container
+dip()    # get container IP
+dstat()  # resource usage stats
+dprune() # clean up system
+# ...
+```
+
+## e. Tailscale with FZF
+
+FZF-powered device selection for Tailscale operations:
+
+```
+_ts_select_device() {
+  tailscale status --json \
+    | jq -r '.Peer[] | "\(.DNSName | split(".")[0])\t\(.TailscaleIPs[0])"' \
+    | fzf --with-nth=1.. \
+    | cut -f1
+}
+
+ts-ssh()  { ssh "$(_ts_select_device)" }
+ts-ping() { tailscale ping "$(_ts_select_device)" }
+ts-send() { tailscale file cp "$@" "$(_ts_select_device):" }
+```
+
+## Functions
+
+Autoloaded functions in `~/.zsh/functions/` only load when first called:
+
+```
+fpath=("$fn_dir" $fpath)
+autoload -U "$fn_dir"/*(:tN)
+```
+
+Useful ones:
+
+- `take dir`, create directory and cd into it
+- `cr`, cd to git repository root
+- `cdf file`, cd to directory containing file
+- `o [path]`, open in file manager (xdg-open/open)
+- `timezsh [n]`, benchmark shell startup time
+
+::: sep
+\~\~\~
+:::
+
+The philosophy behind this configuration is to rely on ZSH\'s built-in features
+rather than frameworks or heavy extensions. No Oh My Zsh, no Prezto, no plugin
+managers. Just plain shell scripts that I understand and control. Keep it
+simple, keep it fast, and customize it precisely to my workflow.
+
+## Links
+
+- [My dotfiles](https://github.com/smallwat3r/dotfiles), full configuration
+  including ZSH
+- [ZSH documentation](https://zsh.sourceforge.io/Doc/), the official reference
+- [zsh-users](https://github.com/zsh-users), community plugins and completions
