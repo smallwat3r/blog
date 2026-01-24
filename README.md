@@ -5,7 +5,7 @@ Personal website and blog.
 ## Build dependencies
 
 - Python 3
-- [Pandoc](https://pandoc.org/) for markdown conversion
+- [Pandoc](https://pandoc.org/) for content conversion
 
 ## Build
 
