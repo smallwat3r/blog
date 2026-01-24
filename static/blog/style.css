@@ -19,14 +19,6 @@ h2 {
   font-style: italic;
   margin-bottom: 1.5em;
 }
-h2 a.anchor {
-  font-weight: normal;
-  margin-right: 0.3em;
-  opacity: 0.4;
-}
-h2 a.anchor:hover {
-  opacity: 1;
-}
 p {
   line-height: 1.6;
   margin-bottom: 1em;
