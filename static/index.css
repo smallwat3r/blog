@@ -48,6 +48,7 @@ body.index .container {
 .index li .date {
   font-size: 16px;
   margin: 0;
+  display: block;
 }
 .index .links {
   margin: 0;
@@ -62,6 +63,9 @@ body.index .container {
     display: flex;
     justify-content: space-between;
     gap: 1em;
+  }
+  .index li .date {
+    display: inline;
   }
 }
 @media (min-width: 768px) {
