@@ -75,7 +75,9 @@ concern. The ones ending in `-ext` are extensions of existing Doom modules:
 - **python-ext**, Python-specific tooling (formatters, debugger, f-string
   toggle)
 - **tools**, misc utilities
-- etc\...
+- etc
+
+The full list is in my [doom config](https://github.com/smallwat3r/dotfiles/tree/main/base/.doom.d).
 
 ## III. Visual configuration
 
@@ -672,8 +674,10 @@ Several Doom defaults are disabled to reduce bloat or avoid conflicts:
 
 ### c. Abbreviations
 
-Quick expansions. Typing `ifn` in Python expands to the main guard pattern,
-`pdb` inserts a debugger breakpoint:
+Emacs abbreviations are quick text expansions. I store mine in `abbrev_defs.el`,
+a file Emacs reads on startup and updates when you define new abbreviations
+interactively. Typing `ifn` in Python expands to the main guard pattern, `pdb`
+inserts a debugger breakpoint:
 
 ```lisp
 (define-abbrev-table 'python-mode-abbrev-table
@@ -702,14 +706,14 @@ normally prompts about the running process, this wrapper suppresses that:
 
 ### e. Custom themes
 
-I maintain two Emacs themes -
+I maintain two Emacs themes:
 [creamy](https://github.com/smallwat3r/emacs-creamy-theme) and
-[simplicity](https://github.com/smallwat3r/emacs-simplicity-theme). They\'re
-loaded from GitHub via Doom\'s package system:
+[simplicity](https://github.com/smallwat3r/emacs-simplicity-theme). Both are
+available on MELPA, and can be loaded via Doom\'s package system:
 
 ```lisp
-(package! creamy-theme
-  :recipe (:host github :repo "smallwat3r/emacs-creamy-theme"))
+(package! creamy-theme)
+(package! simplicity-theme)
 ```
 
 ::: sep

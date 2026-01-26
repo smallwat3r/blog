@@ -7,12 +7,15 @@ BLOG_HTML := $(patsubst content/%.dj,$(BUILD)/%.html,$(BLOG_DJ))
 
 ALL_HTML := $(BLOG_HTML) $(BUILD)/about.html $(BUILD)/index.html
 
+PANDOC := pandoc -f djot -t html
+BLOG_OPTS := --toc -s --template=pandoc/template.html --lua-filter=pandoc/blog.lua
+
 .PHONY: all build clean
 
-# Extract body after frontmatter and convert to HTML
-define dj2html
-	@mkdir -p $(dir $@)
-	@awk '/^---$$/{n++; next} n>=2' $< | pandoc -f djot -t html -o $@
+# Extract body after frontmatter
+define frontmatter
+@mkdir -p $(dir $@)
+@awk '/^---$$/{n++; next} n>=2' $<
 endef
 
 all: build
@@ -22,10 +25,10 @@ $(VENV):
 	$(VENV)/bin/pip install -q jinja2
 
 $(BUILD)/blog/%.html: content/blog/%.dj
-	$(dj2html)
+	$(frontmatter) | $(PANDOC) $(BLOG_OPTS) -o $@
 
 $(BUILD)/%.html: content/%.dj
-	$(dj2html)
+	$(frontmatter) | $(PANDOC) -o $@
 
 build: $(VENV) $(ALL_HTML)
 	$(PYTHON) build.py

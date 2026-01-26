@@ -1,98 +1,33 @@
 /* Shared styles for index and about pages */
-footer {
-  margin-top: 0;
-  padding-top: 0;
-}
+body.index, body.about { height: 100%; min-height: 0; }
+:is(.index, .about) .container { height: 100%; min-height: 0; width: 100%; max-width: 750px; }
+footer { margin-top: 0; padding-top: 0; }
+
 @media (min-width: 768px) {
-  body {
-    padding: 0 0 0 40px;
-  }
-  .container {
-    padding-top: 15px;
-  }
-  .back-link,
-  .about-link {
-    top: 15px;
-  }
+  body { padding: 0 0 0 40px; }
+  .container { padding-top: 15px; }
+  .back-link, .about-link { top: 15px; }
 }
 
 /* Index page */
-body.index {
-  height: 100%;
-  min-height: 0;
-}
-body.index .container {
-  height: 100%;
-  min-height: 0;
-  width: 100%;
-  max-width: 750px;
-}
-.index h1 {
-  margin: 0 0 1em 0;
-  font-size: 18px;
-  padding-right: 4em;
-}
-.index ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  width: 100%;
-}
-.index li {
-  margin-bottom: 0.2em;
-}
-.index li .date {
-  font-size: 16px;
-  margin: 0;
-  display: block;
-}
-.index .links {
-  margin: 0;
-}
+.index h1 { margin: 0 0 1em 0; font-size: 18px; padding-right: 4em; }
+.index ul { list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto; min-height: 0; width: 100%; }
+.index li { margin-bottom: 0.2em; }
+.index li .date { font-size: 16px; margin: 0; display: block; }
+.index .links { margin: 0; }
+
 @media (min-width: 400px) {
-  .index h1 {
-    font-size: 22px;
-  }
+  .index h1 { font-size: 22px; }
 }
 @media (min-width: 500px) {
-  .index li {
-    display: flex;
-    justify-content: space-between;
-    gap: 1em;
-  }
-  .index li .date {
-    display: inline;
-  }
+  .index li { display: flex; justify-content: space-between; gap: 1em; }
+  .index li .date { display: inline; }
 }
 @media (min-width: 768px) {
-  .index h1 {
-    padding-right: 0;
-  }
-  .index li .date {
-    font-size: 17px;
-  }
+  .index h1 { padding-right: 0; }
+  .index li .date { font-size: 17px; }
 }
 
 /* About page */
-body.about {
-  height: 100%;
-  min-height: 0;
-}
-body.about .container {
-  height: 100%;
-  min-height: 0;
-  width: 100%;
-  max-width: 750px;
-}
-.about .footer-section {
-  margin-top: auto;
-}
-.about pre {
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  width: 100%;
-  margin: 0 0 2em 0;
-}
+.about .footer-section { margin-top: auto; }
+.about pre { white-space: pre-wrap; overflow-wrap: break-word; width: 100%; margin: 0 0 2em 0; }
