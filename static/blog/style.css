@@ -71,13 +71,16 @@ code span.wa, code span.al, code span.er { color: #EE2C2C; font-weight: bold; }
     width: 320px;
     font-size: 13px;
     line-height: 0.95;
+    opacity: 0.5;
+    transition: opacity 0.2s;
   }
-  .toc-title { font-weight: bold; margin-bottom: 0.2em; color: var(--color-text-muted); }
+  .toc:hover { opacity: 1; }
+  .toc-title { font-weight: bold; margin-bottom: 0.2em; }
   .toc ul { list-style: none; padding: 0; margin: 0; }
   .toc li { margin-bottom: 0; }
   .toc a { color: var(--color-text-muted); font-style: italic; transition: color 0.15s; }
   .toc a:hover { color: #222; }
-  .toc a.active { color: #0000EE; }
+  .toc a.active { color: #0000EE; opacity: 1; }
   .toc ul ul { padding-left: 2ch; }
   .toc code { font-size: inherit; }
 }
