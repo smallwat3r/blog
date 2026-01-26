@@ -34,4 +34,4 @@ build: $(VENV) $(ALL_HTML)
 	$(PYTHON) build.py
 
 clean:
-	rm -rf dist dist.zip $(BUILD) $(VENV) __pycache__
+	rm -rf dist dist.zip $(BUILD) __pycache__

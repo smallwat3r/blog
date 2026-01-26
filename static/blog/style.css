@@ -83,4 +83,5 @@ code span.wa, code span.al, code span.er { color: #EE2C2C; font-weight: bold; }
   .toc a.active { color: #0000EE; opacity: 1; }
   .toc ul ul { padding-left: 2ch; }
   .toc code { font-size: inherit; }
+  .toc-nav { margin-top: 0.5em; display: flex; gap: 1em; }
 }
