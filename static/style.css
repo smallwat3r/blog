@@ -157,9 +157,6 @@ a.back {
 }
 @media (min-width: 1200px) {
   body {
-    padding: 15px;
-  }
-  .container {
-    margin: 0 auto;
+    padding: 15px 15px 15px 40px;
   }
 }

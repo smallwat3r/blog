@@ -5,6 +5,8 @@ date: 2026-01-23T19:45
 lastmod: 2026-01-24T16:33
 ---
 
+## Introduction
+
 The [Smallcat](https://github.com/smallwat3r/smallcat) is a 26-key keyboard I
 designed. Named after my cat Lila, who acts as a muse through a silkscreen on
 the PCB, it\'s a diodeless, column-staggered keyboard using low-profile Choc
@@ -18,7 +20,7 @@ keymap](https://github.com/smallwat3r/qmk-keymap) relies heavily on layers,
 combos, and tap-hold keys. This post walks through some of the interesting
 design choices.
 
-## The layout
+## I. The layout
 
 The letter arrangement is heavily customized for my workflow and optimized for
 English. I started with [Colemak-DH](https://colemakmods.github.io/mod-dh/),
@@ -79,7 +81,7 @@ holding [R]{.kbd} or [E]{.kbd}. This flexibility means you can choose whichever
 finger is free, and it makes certain key combinations more comfortable depending
 on which hand is doing the work.
 
-## Modular layer definitions
+## II. Modular layer definitions
 
 With 11 layers, keeping the keymap maintainable is important. The config uses a
 macro-based system that splits each layer into left and right hand definitions,
@@ -155,7 +157,7 @@ Adding a new layer means defining 8 small macros and one `LAYER_DEF` line. The
 same definitions work across both Smallcat variants (split and unibody) since
 they share the same `smallwat3r.c` file.
 
-## Combos for missing keys
+## III. Combos for missing keys
 
 With only 26 keys, several letters are missing: [Z]{.kbd}, [Q]{.kbd}, [B]{.kbd},
 [X]{.kbd}, [V]{.kbd}, [J]{.kbd}, some of the [least used in
@@ -191,7 +193,7 @@ L+P = [    F+U = ]
 K+C = (    H+. = )
 ```
 
-## The SYM2 layer trick
+## IV. The SYM2 layer trick
 
 One subtle problem with layer-tap keys: if you hold [R]{.kbd} to access SYM2 and
 then tap [E]{.kbd} for a symbol, you can\'t \"roll\" through [R]{.kbd}-[E]{.kbd}
@@ -208,7 +210,7 @@ symbol:
 
 This allows fast typing without fighting the layer system.
 
-## Custom tap-hold behavior
+## V. Custom tap-hold behavior
 
 Some keys need special tap-hold logic that QMK doesn\'t provide out of the box.
 The [R]{.kbd}+[S]{.kbd} combo is a good example:
@@ -250,7 +252,7 @@ case MK_RS:
     break;
 ```
 
-## Chordal hold
+## VI. Chordal hold
 
 A common frustration with home-row mods is accidental activation when typing
 quickly. QMK\'s chordal hold feature helps, it only triggers a hold if the next
@@ -269,7 +271,7 @@ const char chordal_hold_layout[MATRIX_ROWS][MATRIX_COLS] PROGMEM =
 The `'L'` and `'R'` markers tell QMK which hand each key belongs to. Thumbs are
 marked `'*'` to work with either hand.
 
-## Per-combo timing
+## VII. Per-combo timing
 
 Not all combos are equal. Some key pairs are easier to hit together than others.
 The config defines different timing windows:
@@ -298,7 +300,7 @@ uint16_t get_combo_term(uint16_t combo_index, combo_t *combo) {
 }
 ```
 
-## Unicode for French
+## VIII. Unicode for French
 
 The UNI layer (hold [P]{.kbd}) provides French accented characters. QMK\'s
 unicode feature maps key presses to unicode code points:
@@ -326,7 +328,7 @@ switch (detected_os) {
 }
 ```
 
-## Custom features
+## IX. Custom features
 
 The keymap uses several custom features, some written from scratch and some
 adapted from [Pascal Getreuer\'s](https://getreuer.info/posts/keyboards/)
@@ -396,7 +398,7 @@ excellent QMK extensions.
   }
   ```
 
-## Light switches
+## X. Light switches
 
 With all these layers and combos, key feel matters. I use Kailh Ambients
 Nocturnal switches, 20g actuation force. They\'re absurdly light, which helps
@@ -406,6 +408,8 @@ making them suitable for shared workspaces.
 ::: sep
 \~\~\~
 :::
+
+## Conclusion
 
 This keymap is in constant evolution. Being able to shape how I communicate with
 my machine, fully customised and optimised to my workflow, is truly amazing.

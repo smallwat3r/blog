@@ -8,10 +8,39 @@ h1 {
   margin-bottom: 0.5em;
   padding-right: 4em;
 }
+h2, h3 {
+  position: relative;
+}
 h2 {
   font-size: 20px;
   margin-top: 2em;
   margin-bottom: 0.5em;
+}
+h3 {
+  font-size: 18px;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+h2 .heading-link,
+h3 .heading-link {
+  color: inherit;
+  font-style: normal;
+}
+h2 .heading-link:hover,
+h3 .heading-link:hover {
+  text-decoration: none;
+}
+h2 .pilcrow,
+h3 .pilcrow {
+  position: absolute;
+  left: -1.2em;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+h2:hover .pilcrow,
+h3:hover .pilcrow {
+  opacity: 1;
 }
 .date {
   color: var(--color-text-muted);
@@ -102,6 +131,9 @@ main, article {
   margin: 2em 0;
   letter-spacing: 0.3em;
 }
+.toc {
+  display: none;
+}
 @media (min-width: 768px) {
   .back-link {
     margin-bottom: 0;
@@ -111,5 +143,43 @@ main, article {
   }
   .date {
     font-size: 17px;
+  }
+}
+@media (min-width: 1200px) {
+  .toc {
+    display: block;
+    position: fixed;
+    top: 15px;
+    left: calc(40px + 750px + 40px);
+    width: 320px;
+    font-size: 14px;
+    line-height: 1.1;
+  }
+  .toc-title {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: var(--color-text-muted);
+  }
+  .toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .toc li {
+    margin-bottom: 0;
+  }
+  .toc a {
+    color: var(--color-text-muted);
+    font-style: normal;
+    transition: color 0.15s;
+  }
+  .toc a:hover {
+    color: #222;
+  }
+  .toc a.active {
+    color: #0000EE;
+  }
+  .toc-sub {
+    padding-left: 2ch;
   }
 }
