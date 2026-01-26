@@ -22,15 +22,20 @@ article section > :is(h2, h3) > a {
   text-decoration: none;
   font-style: italic;
 }
-article section > :is(h2, h3) > a::before {
-  content: "\00B6";
-  position: absolute;
-  left: -1.2em;
+article section > :is(h2, h3) > a::after {
+  content: " \00B6";
   color: var(--color-text-muted);
   opacity: 0;
   transition: opacity 0.15s;
 }
-article section > :is(h2, h3):hover > a::before { opacity: 1; }
+article section > :is(h2, h3):hover > a::after { opacity: 1; }
+@media (min-width: 768px) {
+  article section > :is(h2, h3) > a::after {
+    content: "\00B6";
+    position: absolute;
+    left: -1.2em;
+  }
+}
 
 /* Code */
 pre, code, kbd { font-size: 16px; }
