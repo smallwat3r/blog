@@ -15,11 +15,18 @@ non-obvious bits that make daily shell work smoother.
 
 The configuration is split across multiple files:
 
-- `~/.zshenv`, environment variables, loaded first
+- `~/.zshenv`, environment variables, loaded first for all shells
+- `~/.zprofile`, login shell profile, sourced once at login
 - `~/.zshrc`, main entrypoint for interactive shells
 - `~/.zsh/core/`, core shell settings
 - `~/.zsh/tools/`, tool-specific configs
 - `~/.zsh/functions/`, autoloaded shell functions
+
+The distinction matters: `.zshenv` runs first for all shells (including scripts),
+`.zprofile` runs once at login, and `.zshrc` runs for interactive shells only.
+For GUI environments like Sway, variables in `.zprofile` are inherited by the
+compositor and all apps. Things like `$EDITOR`, `$GOPATH`, and PATH additions go
+there so they're available everywhere, not just in terminals.
 
 Files are numbered to control load order. `10-general.zsh` runs before
 `30-alias.zsh`, and `90-bind-rationalise-dots.zsh` runs last (it needs to
@@ -281,13 +288,12 @@ Useful when you have multiple terminals open for different environments.
 
 ## a. Bytecode compilation
 
-ZSH can compile scripts to bytecode (`.zwc` files). The loader compiles files
-automatically when they change:
+ZSH can compile scripts to bytecode (`.zwc` files). Called in `load_zsh_dir`
+before sourcing each file:
 
 ```zsh
 _zsh_compile_if_needed() {
   local src=$1 dst="${1}.zwc"
-  [[ -n $src && -r $src ]] || return 1
   if [[ ! -f $dst || $src -nt $dst ]]; then
     zcompile "$src" 2>/dev/null
   fi
@@ -297,7 +303,8 @@ _zsh_compile_if_needed() {
 ## b. Lazy completion initialization
 
 The completion system is expensive to initialize. Instead of running `compinit`
-fully on every startup, the dump is cached:
+fully on every startup, the dump is cached and compiled to bytecode for faster
+loading:
 
 ```zsh
 () {
@@ -308,6 +315,7 @@ fully on every startup, the dump is cached:
   else
     compinit -C -d "$_zcompdump"  # -C skips security check
   fi
+  _zsh_compile_if_needed "$_zcompdump"
 }
 ```
 
@@ -369,11 +377,36 @@ zstyle ':completion:*:warnings' format '%F{magenta}-- no matches found%f'
 
 ## Plugins
 
-Three plugins loaded from system locations (no plugin manager):
+Two plugins loaded from system locations (no plugin manager):
 
-- **zsh-autosuggestions**, shows history-based suggestions
-- **zsh-syntax-highlighting**, colors commands as you type
-- **zsh-history-substring-search**, search history with arrows
+- **zsh-autosuggestions**, shows history-based suggestions as you type
+- **zsh-syntax-highlighting**, colors commands and highlights errors
+
+A loader function probes OS-specific paths to find and source each plugin:
+
+```zsh
+__load_plugins() {
+  # ... probe OS-specific base dirs (homebrew on macOS, /usr/share on Linux)
+  for plugin in zsh-autosuggestions zsh-syntax-highlighting; do
+    [[ -f "$dir/$plugin/$plugin.zsh" ]] && source "$dir/$plugin/$plugin.zsh"
+  done
+}
+```
+
+Plugins are deferred until the first prompt appears, shaving milliseconds off
+startup time:
+
+```zsh
+__deferred_load_plugins() {
+  __load_plugins
+  __set_zsh_highlight_styles
+  add-zle-hook-widget -d zle-line-init __deferred_load_plugins
+  unfunction __deferred_load_plugins
+}
+
+autoload -Uz add-zle-hook-widget
+add-zle-hook-widget zle-line-init __deferred_load_plugins
+```
 
 Syntax highlighting is configured to be minimal, with dangerous patterns
 highlighted:
