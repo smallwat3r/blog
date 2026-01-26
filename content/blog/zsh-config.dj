@@ -62,7 +62,7 @@ so it can override anything:
 These are the non-obvious bits that make the shell more pleasant to use. Very
 opinionated to my personal liking, but perhaps useful as inspiration.
 
-### a. Rationalise dots
+### a) Rationalise dots
 
 Typing multiple dots expands into parent directory traversal. Type `...` and get
 `../..`. Type `....` and get `../../..`. No more counting dots or typing
@@ -80,7 +80,7 @@ bindkey "." __rationalise-dot
 This widget intercepts the dot key. If the buffer already ends with `..`, it
 appends `/..` instead of just a dot.
 
-### b. The `$` and `%` aliases
+### b) The `$` and `%` aliases
 
 A clever trick that solves two problems at once. These aliases expand to a
 single space:
@@ -99,7 +99,7 @@ starting with a space isn\'t saved to history. So `% export SECRET=xyz` won\'t
 appear in your shell history, and you get a visual indicator that it\'s private.
 Both `$` and `%` work the same way.
 
-### c. Global aliases for piping
+### c) Global aliases for piping
 
 Global aliases expand anywhere in a command, not just at the start. They\'re
 shortcuts for common pipe patterns:
@@ -125,7 +125,7 @@ fi
 Usage: `ps aux G nginx S` expands to `ps aux | grep nginx | sort`. Or
 `cat file C` to copy file contents to clipboard.
 
-### d. Named directories
+### d) Named directories
 
 The `hash -d` builtin creates named directories that work with tilde expansion:
 
@@ -142,7 +142,7 @@ hash -d \
 Now `cd ~c` goes to `~/code`, `ls ~ssh` lists your SSH directory, and
 `vim ~d/.zshrc` edits your zsh config. Works everywhere paths are expected.
 
-### e. Auto-generate git aliases
+### e) Auto-generate git aliases
 
 Instead of manually defining shell aliases for git commands, this reads your git
 config and creates `g<alias>` versions automatically:
@@ -168,7 +168,7 @@ If your gitconfig has `[alias] co = checkout`, you automatically get `gco` in
 your shell. Add a new git alias, restart your shell, and the corresponding `g*`
 alias exists.
 
-### f. Edit command line in `$EDITOR`
+### f) Edit command line in `$EDITOR`
 
 [Ctrl+e]{.kbd} opens the current command in your editor. Essential for complex
 multi-line commands or fixing a long pipeline:
@@ -179,7 +179,7 @@ zle -N edit-command-line
 bindkey '^e' edit-command-line
 ```
 
-### g. Expand aliases before running
+### g) Expand aliases before running
 
 [Ctrl+a]{.kbd} expands aliases in place, so you can see what will actually run
 before hitting enter:
@@ -190,7 +190,7 @@ bindkey '^a' alias-expansion
 zstyle ':completion:alias-expansion:*' completer _expand_alias
 ```
 
-### h. Safe PATH additions with array subscript flags
+### h) Safe PATH additions with array subscript flags
 
 ZSH\'s array subscript flags let you check if an element exists before adding
 it. The `(Ie)` flag returns the index of an exact match, or 0 if not found. This
@@ -219,7 +219,7 @@ directory, and git info:
 PROMPT='%(?..%F{red}?%? )$(__tag)$(__is_venv)%f%3~%f$(__git_prompt_segment)%# '
 ```
 
-### a. Git status with timeout
+### a) Git status with timeout
 
 The git segment shows branch, dirty state, root marker, and a special PAUSED
 badge. All git commands run with a 500ms timeout to prevent hanging on slow
@@ -267,7 +267,7 @@ The PAUSED badge is a workflow convention. Before switching contexts, commit
 with a message starting with \"PAUSED\" (e.g., \"PAUSED: working on auth
 refactor\"). The prompt reminds you there\'s incomplete work.
 
-### b. Prompt tags
+### b) Prompt tags
 
 The `tag` function adds custom text to the prompt:
 
@@ -288,7 +288,7 @@ Useful when you have multiple terminals open for different environments.
 
 ## IV. Performance
 
-### a. Bytecode compilation
+### a) Bytecode compilation
 
 ZSH can compile scripts to bytecode (`.zwc` files). Called in `load_zsh_dir`
 before sourcing each file:
@@ -302,7 +302,7 @@ _zsh_compile_if_needed() {
 }
 ```
 
-### b. Lazy completion initialization
+### b) Lazy completion initialization
 
 The completion system is expensive to initialize. Instead of running `compinit`
 fully on every startup, the dump is cached and compiled to bytecode for faster
@@ -321,7 +321,7 @@ loading:
 }
 ```
 
-### c. Conditional tool loading
+### c) Conditional tool loading
 
 Each tool config checks if the tool exists before loading:
 
@@ -332,7 +332,7 @@ Each tool config checks if the tool exists before loading:
 No errors on machines without certain tools, and no time wasted loading configs
 for tools that aren\'t installed.
 
-### d. Profiling
+### d) Profiling
 
 Set `DEBUG_ZSH_PERF=1` before starting a shell to enable profiling:
 
@@ -425,7 +425,7 @@ ZSH_HIGHLIGHT_REGEXP+=('\bsudo\b' fg=164,bold)
 
 ## VII. Tool configs
 
-### a. Git SSH hardening
+### a) Git SSH hardening
 
 Git SSH commands use hardened options for reliability:
 
@@ -439,7 +439,7 @@ export GIT_SSH_COMMAND='ssh -4 \
   -o ControlMaster=no'
 ```
 
-### b. FZF with ripgrep
+### b) FZF with ripgrep
 
 FZF uses ripgrep as backend and has minimal colors:
 
@@ -455,7 +455,7 @@ export FZF_DEFAULT_OPTS="
 export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git/*"'
 ```
 
-### c. Python virtualenv activation
+### c) Python virtualenv activation
 
 A function walks up the directory tree to find and activate the nearest `.venv`:
 
@@ -484,7 +484,7 @@ vpip()    { _avenv_ensure && pip "$@" }
 vpytest() { _avenv_ensure && pytest "$@" }
 ```
 
-### d. Docker helpers
+### d) Docker helpers
 
 Formatted output and common operations. A helper formats output using column
 alignment:
@@ -519,7 +519,7 @@ dip() {
 }
 ```
 
-### e. Tailscale with FZF
+### e) Tailscale with FZF
 
 FZF-powered device selection for Tailscale operations:
 

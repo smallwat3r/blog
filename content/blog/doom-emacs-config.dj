@@ -228,7 +228,7 @@ movements possible without leaving insert mode:
 The terminal module configures [vterm](https://github.com/akermu/emacs-libvterm)
 and TRAMP for remote file access.
 
-### a. SSH config parsing
+### a) SSH config parsing
 
 TRAMP is configured to parse multiple SSH config files for host completion:
 
@@ -250,7 +250,7 @@ TRAMP is configured to parse multiple SSH config files for host completion:
     (tramp-parse-shosts "~/.ssh/known_hosts"))))
 ```
 
-### b. Quick SSH connection
+### b) Quick SSH connection
 
 [SPC o .]{.kbd} prompts with `read-file-name` starting at `/ssh:`, triggering
 TRAMP\'s completion with all configured hosts:
@@ -262,7 +262,7 @@ TRAMP\'s completion with all configured hosts:
   (find-file (read-file-name "Pick target: " "/ssh:")))
 ```
 
-### c. TRAMP optimizations
+### c) TRAMP optimizations
 
 TRAMP can be slow out of the box. These settings help:
 
@@ -297,7 +297,7 @@ exists (`mkdir -p ~/.ssh/sockets`).
 The first caches remote file properties longer, reducing round-trips. The second
 disables version control checks on remote files, which can be slow over SSH.
 
-### d. Remote file editing from shell
+### d) Remote file editing from shell
 
 When opening vterm on a remote TRAMP connection, a hook injects an `e` shell
 function to open remote files from the remote shell in a local Emacs buffer:
@@ -527,7 +527,7 @@ distracting, so it\'s triggered explicitly when needed:
 Custom helper functions live in `autoload/`, organized by purpose. Doom
 automatically loads these when called.
 
-### a. Buffer management
+### a) Buffer management
 
 From `autoload/buffer.el`:
 
@@ -546,7 +546,7 @@ From `autoload/buffer.el`:
   (message "Killed all buffers except: %s" (current-buffer)))
 ```
 
-### b. Insertions
+### b) Insertions
 
 From `autoload/insert.el`:
 
@@ -565,7 +565,7 @@ From `autoload/insert.el`:
     (insert (my/get-email choice))))
 ```
 
-### c. Process management
+### c) Process management
 
 From `autoload/process.el`, a fuzzy process killer showing CPU and memory usage:
 
@@ -591,7 +591,7 @@ From `autoload/process.el`, a fuzzy process killer showing CPU and memory usage:
     (message "Killed: %s" choice)))
 ```
 
-### d. Search helpers
+### d) Search helpers
 
 From `autoload/search.el`:
 
@@ -614,7 +614,7 @@ From `autoload/search.el`:
   (+vertico/project-search arg (thing-at-point 'symbol)))
 ```
 
-### e. Window management
+### e) Window management
 
 From `autoload/window.el`, fine-grained scrolling and resizing, moving 3 lines
 or 5 columns at a time rather than Emacs defaults:
@@ -638,7 +638,7 @@ or 5 columns at a time rather than Emacs defaults:
 
 ## XI. Useful hacks
 
-### a. Wayland environment propagation
+### a) Wayland environment propagation
 
 When running Emacs as a daemon under Sway, subprocesses (like Magit\'s git
 hooks) can\'t access Wayland because the daemon started without those
@@ -658,7 +658,7 @@ into the daemon\'s environment:
              #'my/update-wayland-env-from-frame))
 ```
 
-### b. Disabled packages
+### b) Disabled packages
 
 Several Doom defaults are disabled to reduce bloat or avoid conflicts:
 
@@ -672,7 +672,7 @@ Several Doom defaults are disabled to reduce bloat or avoid conflicts:
  evil-escape)   ; not needed with my custom keyboard
 ```
 
-### c. Abbreviations
+### c) Abbreviations
 
 Emacs abbreviations are quick text expansions. I store mine in `abbrev_defs.el`,
 a file Emacs reads on startup and updates when you define new abbreviations
@@ -686,7 +686,7 @@ inserts a debugger breakpoint:
     ("shb" "#!/usr/bin/env python3\n" nil 0)))
 ```
 
-### d. Buffer management helpers
+### d) Buffer management helpers
 
 Handle common operations that Emacs makes awkward. Killing a vterm buffer
 normally prompts about the running process, this wrapper suppresses that:
@@ -704,7 +704,7 @@ normally prompts about the running process, this wrapper suppresses that:
     (kill-buffer buf)))
 ```
 
-### e. Custom themes
+### e) Custom themes
 
 I maintain two Emacs themes:
 [creamy](https://github.com/smallwat3r/emacs-creamy-theme) and

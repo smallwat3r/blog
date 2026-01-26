@@ -334,69 +334,76 @@ The keymap uses several custom features, some written from scratch and some
 adapted from [Pascal Getreuer\'s](https://getreuer.info/posts/keyboards/)
 excellent QMK extensions.
 
-- **OS-aware keys**, common operations like copy, paste, undo, and word
-  navigation use different modifiers on macOS (Cmd) vs Linux/Windows (Ctrl). The
-  `os_keys` feature detects the OS and sends the right shortcut. Covers
-  clipboard, navigation, zoom, find, and more.
+### a) OS-aware keys
 
-  ```c
-  case OS_COPY:
-      OS_TAP(G(KC_C), C(KC_C));  // Cmd+C on Mac, Ctrl+C elsewhere
-  case OS_L_W:
-      OS_REPEAT(A(KC_LEFT), C(KC_LEFT));  // word left
-  ```
+Common operations like copy, paste, undo, and word navigation use different
+modifiers on macOS (Cmd) vs Linux/Windows (Ctrl). The `os_keys` feature detects
+the OS and sends the right shortcut. Covers clipboard, navigation, zoom, find,
+and more.
 
-- **Select word**, from Pascal Getreuer\'s collection. Select words and lines
-  with a single key, hold to extend the selection. Handles OS differences
-  internally.
+```c
+case OS_COPY:
+    OS_TAP(G(KC_C), C(KC_C));  // Cmd+C on Mac, Ctrl+C elsewhere
+case OS_L_W:
+    OS_REPEAT(A(KC_LEFT), C(KC_LEFT));  // word left
+```
 
-  ```c
-  case MK_SEL_BACK:
-      select_word_register('B');  // select word backward
-  case MK_SEL_LINE:
-      select_word_register('L');  // select entire line
-  ```
+### b) Select word
 
-- **Sentence case**, another Getreuer feature. Automatically capitalizes the
-  first letter after sentence-ending punctuation. Useful for prose, toggled off
-  for code.
+From Pascal Getreuer's collection. Select words and lines with a single key,
+hold to extend the selection. Handles OS differences internally.
 
-- **Autocorrect**, QMK\'s built-in feature that fixes common typos as you type.
-  A custom dictionary in `autocorrection_dict.txt` gets compiled into a binary
-  trie via `make autocorrect`. A `:` prefix or suffix marks a word boundary,
-  preventing false corrections within longer words. Sample entries:
+```c
+case MK_SEL_BACK:
+    select_word_register('B');  // select word backward
+case MK_SEL_LINE:
+    select_word_register('L');  // select entire line
+```
 
-  ```
-  becuase    -> because
-  definately -> definitely
-  seperate   -> separate
-  wierd      -> weird
-  :ture      -> true
-  :wont:     -> won't
-  ```
+### c) Sentence case
 
-  Without the leading `:`, `ture -> true` would incorrectly turn \"feature\"
-  into \"featrue\". `:wont:` requires word breaks on both sides, so \"unwonted\"
-  won\'t become \"unwon\'ted\".
+Another Getreuer feature. Automatically capitalizes the first letter after
+sentence-ending punctuation. Useful for prose, toggled off for code.
 
-- **LED/RGB indicator**, the onboard LED or RGB (depending on the
-  microcontroller) provides visual feedback: solid on for Caps Word, slow blink
-  for One-Shot Shift, double flash when autocorrect applies a correction, and
-  three blinks on startup to indicate connection. QMK provides hooks to trigger
-  these states:
+### d) Autocorrect
 
-  ```c
-  bool caps_word_set_user(bool active) {
-      caps_word_active = active;
-      indicator_set(active);
-      return true;
-  }
+QMK's built-in feature that fixes common typos as you type. A custom dictionary
+in `autocorrection_dict.txt` gets compiled into a binary trie via
+`make autocorrect`. A `:` prefix or suffix marks a word boundary, preventing
+false corrections within longer words. Sample entries:
 
-  bool apply_autocorrect(uint8_t backspaces, const char *str, char *typo, ...) {
-      led_indicator_flash(2);  // double flash on correction
-      return true;
-  }
-  ```
+```
+becuase    -> because
+definately -> definitely
+seperate   -> separate
+wierd      -> weird
+:ture      -> true
+:wont:     -> won't
+```
+
+Without the leading `:`, `ture -> true` would incorrectly turn "feature" into
+"featrue". `:wont:` requires word breaks on both sides, so "unwonted" won't
+become "unwon'ted".
+
+### e) LED/RGB indicator
+
+The onboard LED or RGB (depending on the microcontroller) provides visual
+feedback: solid on for Caps Word, slow blink for One-Shot Shift, double flash
+when autocorrect applies a correction, and three blinks on startup to indicate
+connection. QMK provides hooks to trigger these states:
+
+```c
+bool caps_word_set_user(bool active) {
+    caps_word_active = active;
+    indicator_set(active);
+    return true;
+}
+
+bool apply_autocorrect(uint8_t backspaces, const char *str, char *typo, ...) {
+    led_indicator_flash(2);  // double flash on correction
+    return true;
+}
+```
 
 ## X. Light switches
 
