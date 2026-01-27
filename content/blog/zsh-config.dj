@@ -394,18 +394,22 @@ __load_plugins() {
 ```
 
 Plugins are deferred until the first prompt appears, shaving milliseconds off
-startup time:
+startup time. The autosuggestions plugin needs a manual reinit after deferred
+loading, otherwise suggestions won't appear until you open a new line:
 
 ```zsh
 __deferred_load_plugins() {
   __load_plugins
   __set_zsh_highlight_styles
-  add-zle-hook-widget -d zle-line-init __deferred_load_plugins
+  # reinitialize autosuggestions after deferred load
+  (( $+functions[_zsh_autosuggest_start] )) && _zsh_autosuggest_start
+  # unhook after first run
+  add-zsh-hook -d precmd __deferred_load_plugins
   unfunction __deferred_load_plugins
 }
 
-autoload -Uz add-zle-hook-widget
-add-zle-hook-widget zle-line-init __deferred_load_plugins
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd __deferred_load_plugins
 ```
 
 Syntax highlighting is configured to be minimal, with dangerous patterns
