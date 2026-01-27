@@ -2,7 +2,7 @@
 title: A modular ZSH setup
 description: A walkthrough of my modular ZSH configuration. Covers performance optimizations, custom prompt with git status, completion system, plugins, and tool-specific helpers.
 date: 2025-12-01T09:15
-lastmod: 2026-01-24T16:33
+lastmod: 2026-01-27T12:00
 ---
 
 ## Introduction
@@ -222,26 +222,25 @@ PROMPT='%(?..%F{red}?%? )$(__tag)$(__is_venv)%f%3~%f$(__git_prompt_segment)%# '
 ### a) Git status
 
 The git segment shows branch, dirty state, root marker, and a special PAUSED
-badge. All git commands use `--no-optional-locks` to prevent hangs on busy
-repositories, and run in a single subshell with NUL separators for efficient
+badge. The `GIT_OPTIONAL_LOCKS=0` environment variable prevents git from
+acquiring locks, avoiding delays on busy repositories. The `--no-ahead-behind`
+flag skips counting commits ahead/behind the remote, which speeds things up.
+Both git commands run in a single subshell with NUL separators for efficient
 parsing:
 
 ```zsh
 __git_prompt_segment() {
-  local info gstatus prefix subject branch dirty root paused
+  local info gstatus subject branch dirty root paused
 
   info=$(
-    git --no-optional-locks status --porcelain=v2 -b 2>/dev/null
+    export GIT_OPTIONAL_LOCKS=0
+    git status --porcelain=v2 -b --no-ahead-behind 2>/dev/null
     printf '\0'
-    git --no-optional-locks rev-parse --show-prefix 2>/dev/null
-    printf '\0'
-    git --no-optional-locks log -1 --format=%s 2>/dev/null
-  ) || return
+    git log -1 --format=%s 2>/dev/null
+  )
 
-  # Parse NUL-separated output: gstatus\0prefix\0subject
+  # Parse NUL-separated output: gstatus\0subject
   gstatus=${info%%$'\x00'*}
-  info=${info#*$'\x00'}
-  prefix=${info%%$'\x00'*}
   subject=${info#*$'\x00'}
 
   # Branch from "# branch.head <name>" line in porcelain v2 output
@@ -251,10 +250,8 @@ __git_prompt_segment() {
 
   # Dirty if any non-header line exists (file status lines don't start with #)
   [[ $gstatus == *$'\n'[^#]* ]] && dirty='*'
-
-  # At root if prefix is empty (rev-parse --show-prefix returns empty at root)
-  [[ "$prefix" == $'\n' || -z "$prefix" ]] && root='~'
-
+  # At root if .git exists in current directory
+  [[ -e .git ]] && root='~'
   # PAUSED badge for git-pause workflow (commit with "PAUSED: ..." message)
   [[ $subject == PAUSED* ]] && paused=' %B%F{198}%K{52}[PAUSED]%b%f%k'
 
@@ -277,15 +274,11 @@ refactor\"). The prompt reminds you there\'s incomplete work.
 The `tag` function adds custom text to the prompt:
 
 ```zsh
-tag() {
-  _PROMPT_TAG="$1"
+__tag() {
+  [[ -n "$_PROMPT_TAG" ]] && echo "%B%F{87}%K{20}[${(U)_PROMPT_TAG}]%b%f%k "
 }
 
-__tag() {
-  if [[ -n "${_PROMPT_TAG}" ]]; then
-    echo "%B%F{87}%K{20}[${(U)_PROMPT_TAG}]%b%f%k "
-  fi
-}
+tag() { _PROMPT_TAG="$1" }
 ```
 
 Run `tag production` and your prompt shows `[PRODUCTION]` in bright colors.
