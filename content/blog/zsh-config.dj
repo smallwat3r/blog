@@ -219,49 +219,54 @@ directory, and git info:
 PROMPT='%(?..%F{red}?%? )$(__tag)$(__is_venv)%f%3~%f$(__git_prompt_segment)%# '
 ```
 
-### a) Git status with timeout
+### a) Git status
 
 The git segment shows branch, dirty state, root marker, and a special PAUSED
-badge. All git commands run with a 500ms timeout to prevent hanging on slow
-filesystems:
-
-```zsh
-__with_timeout() {
-  local timeout_cmd
-  if command -v timeout &>/dev/null; then
-    timeout_cmd="timeout"
-  elif command -v gtimeout &>/dev/null; then
-    timeout_cmd="gtimeout"
-  else
-    "$@"
-    return
-  fi
-  $timeout_cmd 0.5s "$@"
-}
-```
-
-The git segment uses this wrapper for all git calls:
+badge. All git commands use `--no-optional-locks` to prevent hangs on busy
+repositories, and run in a single subshell with NUL separators for efficient
+parsing:
 
 ```zsh
 __git_prompt_segment() {
-  local git_status first_line branch dirty root paused
+  local info gstatus prefix subject branch dirty root paused
 
-  git_status=$(__with_timeout git status --porcelain=v1 -b 2>/dev/null) || return
+  info=$(
+    git --no-optional-locks status --porcelain=v2 -b 2>/dev/null
+    printf '\0'
+    git --no-optional-locks rev-parse --show-prefix 2>/dev/null
+    printf '\0'
+    git --no-optional-locks log -1 --format=%s 2>/dev/null
+  ) || return
 
-  # extract branch name from "## master...origin/master [ahead 1]"
-  first_line=${git_status%%$'\n'*}
-  branch=${first_line#\#\# }
-  branch=${branch%%...*}
+  # Parse NUL-separated output: gstatus\0prefix\0subject
+  gstatus=${info%%$'\x00'*}
+  info=${info#*$'\x00'}
+  prefix=${info%%$'\x00'*}
+  subject=${info#*$'\x00'}
 
-  # ...check dirty state, repo root...
+  # Branch from "# branch.head <name>" line in porcelain v2 output
+  branch=${gstatus#*branch.head }
+  branch=${branch%%$'\n'*}
+  [[ -z "$branch" || "$branch" == "# "* ]] && return
 
-  # PAUSED badge if last commit starts with "PAUSED"
-  local subject=$(__with_timeout git log -1 --format="%s" 2>/dev/null)
+  # Dirty if any non-header line exists (file status lines don't start with #)
+  [[ $gstatus == *$'\n'[^#]* ]] && dirty='*'
+
+  # At root if prefix is empty (rev-parse --show-prefix returns empty at root)
+  [[ "$prefix" == $'\n' || -z "$prefix" ]] && root='~'
+
+  # PAUSED badge for git-pause workflow (commit with "PAUSED: ..." message)
   [[ $subject == PAUSED* ]] && paused=' %B%F{198}%K{52}[PAUSED]%b%f%k'
 
   printf '%s%%F{yellow} (%s%s%s)%%f ' "$paused" "$branch" "$dirty" "$root"
 }
 ```
+
+I considered alternatives like [gitstatus](https://github.com/romkatv/gitstatus)
+(very performant, but requires a background daemon), or rewriting the prompt in
+Rust or Go. But the performance gain is barely noticeable for my use case, and I
+prefer not having a daemon running just for shell prompts. Plain ZSH is fast
+enough, keeps the setup simple, and is much easier to maintain or update.
 
 The PAUSED badge is a workflow convention. Before switching contexts, commit
 with a message starting with \"PAUSED\" (e.g., \"PAUSED: working on auth
