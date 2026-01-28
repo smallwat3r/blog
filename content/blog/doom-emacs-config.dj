@@ -32,7 +32,6 @@ The `init.el` declares which modules to load. Mine starts with personal modules
 
 ```lisp
 (doom! :smallwat3r
-       claude
        evil-ext
        git-ext
        terminal
@@ -65,7 +64,6 @@ real power is that you can write your own modules following the same structure.
 My personal modules live in `modules/smallwat3r/`. Each handles a specific
 concern. The ones ending in `-ext` are extensions of existing Doom modules:
 
-- **claude**, Claude CLI integration via vterm
 - **evil-ext**, Evil mode customizations and cursor colors
 - **git-ext**, Magit tweaks and SSH options for Git
 - **terminal**, vterm configuration and TRAMP helpers
@@ -358,76 +356,7 @@ terminates. So `printf '\033]51;Efind-file /ssh:host:/path\007'` tells vterm to
 run `(find-file "/ssh:host:/path")` in Emacs. The TRAMP prefix is baked into the
 function when it\'s injected, so paths automatically resolve to the remote host.
 
-## VII. Claude CLI integration
-
-The `claude` module provides integration with [Claude
-Code](https://claude.ai/claude-code) (the CLI tool). It runs Claude sessions
-inside [vterm](https://github.com/akermu/emacs-libvterm) buffers, giving a full
-terminal experience with proper rendering of Claude\'s output. Sessions are
-tracked per project, allowing multiple concurrent chats.
-
-Creating a new session spawns a vterm buffer and runs the `claude` command. The
-buffer is named with the project and session number:
-
-```lisp
-(defun my/claude-new (&optional dir)
-  "Start a new Claude session in DIR."
-  (interactive)
-  (let* ((dir (or dir default-directory))
-         (root (or (doom-project-root dir) dir))
-         (num (1+ (length (my/claude--get-buffers root))))
-         (name (format "*claude:%s:%d*"
-                       (file-name-nondirectory (directory-file-name root))
-                       num))
-         (default-directory dir))
-    (let ((buf (vterm name)))
-      (with-current-buffer buf
-        (vterm-send-string "claude\n"))
-      (my/claude--register-buffer root buf)
-      buf)))
-```
-
-The module provides functions to send code to Claude.
-`my/claude-send-region-with-context` wraps the selection with filename and line
-number, giving Claude more context about where the code lives:
-
-```lisp
-(defun my/claude-send-region-with-context (beg end)
-  "Send region to Claude with file context."
-  (interactive "r")
-  (let* ((file (or (buffer-file-name) (buffer-name)))
-         (line (line-number-at-pos beg))
-         (code (buffer-substring-no-properties beg end))
-         (text (format "From %s:%d\n\n```\n%s\n```" file line code)))
-    (my/claude-send-string text)))
-```
-
-`my/claude-send-region-with-prompt` prepends a prompt prefix from a customizable
-list of common operations:
-
-```lisp
-(defcustom my-claude-prompt-prefixes
-  '("Explain this code"
-    "Review this code"
-    "Find bugs in this code"
-    "Refactor this code"
-    "Add tests for this code"
-    "Document this code")
-  "List of prompt prefixes.")
-
-(defun my/claude-send-region-with-prompt (beg end)
-  "Send region to Claude with a prompt prefix."
-  (interactive "r")
-  (let* ((prefix (completing-read "Prompt: " my-claude-prompt-prefixes nil t))
-         (code (buffer-substring-no-properties beg end))
-         (text (format "%s:\n\n```\n%s\n```" prefix code)))
-    (my/claude-send-string text)))
-```
-
-Other functions handle session switching, toggling visibility, and sending the
-current buffer or region directly.
-
-## VIII. Git and Magit extensions
+## VII. Git and Magit extensions
 
 Magit gets several quality-of-life improvements. First, the [h]{.kbd} and
 [l]{.kbd} keys are unbound so they work for cursor movement in Evil mode:
@@ -470,7 +399,7 @@ down, matching the rest of Evil\'s directional conventions:
         "J" #'git-rebase-move-line-down))
 ```
 
-## IX. Programming setup
+## VIII. Programming setup
 
 I use [Eglot](https://github.com/joaotavora/eglot) for LSP instead of lsp-mode.
 It\'s built into Emacs 29+ and requires less configuration. Inlay hints are
@@ -522,7 +451,7 @@ distracting, so it\'s triggered explicitly when needed:
 (remove-hook! 'doom-first-buffer-hook #'global-flycheck-mode)
 ```
 
-## X. Utility functions
+## IX. Utility functions
 
 Custom helper functions live in `autoload/`, organized by purpose. Doom
 automatically loads these when called.
@@ -636,7 +565,7 @@ or 5 columns at a time rather than Emacs defaults:
   (enlarge-window-horizontally 5))
 ```
 
-## XI. Useful hacks
+## X. Useful hacks
 
 ### a) Wayland environment propagation
 
