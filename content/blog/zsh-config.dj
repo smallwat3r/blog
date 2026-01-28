@@ -2,7 +2,7 @@
 title: A modular ZSH setup
 description: A walkthrough of my modular ZSH configuration. Covers performance optimizations, custom prompt with git status, completion system, plugins, and tool-specific helpers.
 date: 2025-12-01T09:15
-lastmod: 2026-01-27T12:00
+lastmod: 2026-01-28T12:00
 ---
 
 ## Introduction
@@ -30,9 +30,10 @@ For GUI environments like Sway, variables in `.zprofile` are inherited by the
 compositor and all apps. Things like `$EDITOR`, `$GOPATH`, and PATH additions go
 there so they're available everywhere, not just in terminals.
 
-Files are numbered to control load order. `10-general.zsh` runs before
-`30-alias.zsh`, and `90-bind-rationalise-dots.zsh` runs last (it needs to
-override the default dot behavior after everything else is loaded).
+Files are numbered to control load order. `05-helpers.zsh` loads first with
+shared utilities, `10-general.zsh` sets shell options, and
+`90-bind-rationalise-dots.zsh` runs last (it needs to override the default dot
+behavior after everything else is loaded).
 
 A loader function iterates through directories and sources files:
 
@@ -57,7 +58,71 @@ so it can override anything:
 [[ -f $HOME/.zshrc.private ]] && source "$HOME/.zshrc.private"
 ```
 
-## II. Hacks and tricks
+## II. Shared helpers
+
+The `05-helpers.zsh` file loads first and provides utilities used throughout the
+config. OS detection functions avoid repeating `$OSTYPE` checks everywhere:
+
+```zsh
+[[ "$OSTYPE" =~ ^darwin ]] && __IS_MACOS=1 || __IS_MACOS=0
+[[ "$OSTYPE" =~ ^linux ]] && __IS_LINUX=1 || __IS_LINUX=0
+
+is_macos() { (( __IS_MACOS )); }
+is_linux() { (( __IS_LINUX )); }
+```
+
+The `has` function checks if commands exist, supporting multiple arguments:
+
+```zsh
+has() {
+  local cmd
+  for cmd in "$@"; do
+    (( $+commands[$cmd] )) || return 1
+  done
+}
+
+# Usage
+has git && git status
+has git fzf jq && echo "all installed"
+```
+
+PATH management functions add directories only if they exist and aren\'t already
+present. ZSH\'s array subscript flags make this easy: the `I` flag returns the
+index of the first match, `e` requires an exact string match. When the result is
+0, the path isn\'t in the array yet:
+
+```zsh
+path_add() {
+  [[ -d $1 ]] && (( ${path[(Ie)$1]} == 0 )) && path+=("$1")
+}
+
+path_prepend() {
+  [[ -d $1 ]] && (( ${path[(Ie)$1]} == 0 )) && path=("$1" $path)
+}
+```
+
+This prevents duplicate entries from accumulating when sourcing the config
+multiple times. Used throughout tool configs for Go, Rust, Emacs, and Homebrew.
+
+A cross-platform clipboard function handles macOS, Wayland, and X11:
+
+```zsh
+clip() {
+  if is_macos; then
+    pbcopy
+  elif has wl-copy; then
+    wl-copy
+  elif has xclip; then
+    xclip -selection clipboard
+  else
+    cat
+    echo 'No clipboard tool found, printed to stdout.' >&2
+    return 1
+  fi
+}
+```
+
+## III. Hacks and tricks
 
 These are the non-obvious bits that make the shell more pleasant to use. Very
 opinionated to my personal liking, but perhaps useful as inspiration.
@@ -190,25 +255,7 @@ bindkey '^a' alias-expansion
 zstyle ':completion:alias-expansion:*' completer _expand_alias
 ```
 
-### h) Safe PATH additions with array subscript flags
-
-ZSH\'s array subscript flags let you check if an element exists before adding
-it. The `(Ie)` flag returns the index of an exact match, or 0 if not found. This
-pattern appears throughout the config for tools like Go, Rust, Emacs, and
-Homebrew packages:
-
-```zsh
-# Only add to PATH if not already present
-if (( ${path[(Ie)$GOPATH/bin]} == 0 )); then
-  path+=("$GOPATH/bin")
-fi
-```
-
-The `I` flag returns the index of the first match, `e` requires an exact string
-match. When the result is 0, the path isn\'t in the array yet. This prevents
-duplicate entries from accumulating when sourcing the config multiple times.
-
-## III. Custom prompt
+## IV. Custom prompt
 
 I prefer rolling my own prompt over tools like Starship or Oh My Zsh themes.
 Simpler to maintain, no external dependencies, and full control over what it
@@ -284,7 +331,7 @@ tag() { _PROMPT_TAG="$1" }
 Run `tag production` and your prompt shows `[PRODUCTION]` in bright colors.
 Useful when you have multiple terminals open for different environments.
 
-## IV. Performance
+## V. Performance
 
 ### a) Bytecode compilation
 
@@ -324,7 +371,7 @@ loading:
 Each tool config checks if the tool exists before loading:
 
 ```zsh
-(( $+commands[docker] )) || return
+has docker || return
 ```
 
 No errors on machines without certain tools, and no time wasted loading configs
@@ -352,27 +399,6 @@ run  1:  42 ms
 run  2:  41 ms
 ...
 Average: 41 ms
-```
-
-## V. Completion
-
-Completion settings enable fuzzy matching and a menu interface:
-
-```zsh
-setopt COMPLETE_IN_WORD  # complete from both ends
-setopt AUTO_MENU         # menu after second tab
-setopt ALWAYS_TO_END     # cursor to end after completion
-
-# case-insensitive, partial matching on separators
-zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' \
-       'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-
-# navigable menu
-zstyle ':completion:*' menu select
-
-# colored feedback
-zstyle ':completion:*:corrections' format '%F{green}-- %d (errors: %e)%f'
-zstyle ':completion:*:warnings' format '%F{magenta}-- no matches found%f'
 ```
 
 ## VI. Plugins
