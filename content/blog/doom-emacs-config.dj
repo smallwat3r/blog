@@ -27,17 +27,12 @@ The configuration lives in `~/.doom.d/` and follows a modular structure:
 - `modules/`, personal Doom modules
 - `templates/`, file templates
 
-The `init.el` declares which modules to load. Mine starts with personal modules
-(prefixed `:smallwat3r`), then Doom\'s built-in modules:
+The `init.el` declares which modules to load. Doom modules are listed first,
+with personal modules (prefixed `:smallwat3r`) placed at the end so their
+config runs after Doom\'s built-in modules, allowing overrides:
 
 ```lisp
-(doom! :smallwat3r
-       evil-ext
-       git-ext
-       terminal
-       ;; ...
-
-       :completion
+(doom! :completion
        (corfu +orderless +icons +dabbrev)
        (vertico +icons)
 
@@ -45,7 +40,15 @@ The `init.el` declares which modules to load. Mine starts with personal modules
        (lsp +eglot +booster)
        (magit +forge)
        ;; ...
-       )
+
+       :smallwat3r
+       evil-ext
+       git-ext
+       terminal
+       ;; ...
+
+       :config
+       (default +bindings +smartparens))
 ```
 
 This approach keeps the main config clean. Each personal module is
