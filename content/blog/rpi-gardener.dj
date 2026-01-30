@@ -732,7 +732,7 @@ pattern makes adding new components simple.
 \~\~\~
 :::
 
-## Conclusion
+## Wrapping up
 
 Building this system was a fun blend of hardware and software challenges.
 Calibrating sensors, designing the alert hysteresis, getting SSE streaming

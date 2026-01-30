@@ -651,7 +651,7 @@ available on MELPA, and can be loaded via Doom\'s package system:
 \~\~\~
 :::
 
-## Conclusion
+## Wrapping up
 
 This configuration represents years of incremental refinement. The modular
 structure makes it easy to enable or disable features without breaking

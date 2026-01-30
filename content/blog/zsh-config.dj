@@ -590,7 +590,7 @@ mkdir -p "$@" && cd "$@" || return
 \~\~\~
 :::
 
-## Conclusion
+## Wrapping up
 
 The philosophy behind this configuration is to rely on ZSH\'s built-in features
 rather than frameworks or heavy extensions. No Oh My Zsh, no Prezto, no plugin
