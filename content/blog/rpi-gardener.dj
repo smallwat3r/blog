@@ -640,6 +640,8 @@ Volumes persist the SQLite database and SSL certificates across restarts.
 
 ## XI. Configuration
 
+### a) Environment variables
+
 All settings are environment variables validated by Pydantic at startup:
 
 ```sh
@@ -673,7 +675,7 @@ Services check their enable flags at startup and exit cleanly if disabled. The
 admin UI can override thresholds and notification settings without container
 restarts.
 
-### a) Mock sensors for development
+### b) Mock sensors for development
 
 Running the full stack without hardware is useful for development and testing.
 Setting `MOCK_SENSORS=1` replaces real sensor reads with simulated data:
