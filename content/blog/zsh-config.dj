@@ -25,7 +25,7 @@ The configuration is split across multiple files:
 
 The distinction matters: `.zshenv` runs first for all shells (including scripts),
 `.zprofile` runs once at login, and `.zshrc` runs for interactive shells only.
-For GUI environments like Sway, variables in `.zprofile` are inherited by the
+For GUI environments like [Sway](https://swaywm.org/), variables in `.zprofile` are inherited by the
 compositor and all apps. Things like `$EDITOR`, `$GOPATH`, and PATH additions go
 there so they're available everywhere, not just in terminals.
 
@@ -256,7 +256,7 @@ zstyle ':completion:alias-expansion:*' completer _expand_alias
 
 ## IV. Custom prompt
 
-I prefer rolling my own prompt over tools like Starship or Oh My Zsh themes.
+I prefer rolling my own prompt over tools like [Starship](https://starship.rs/) or [Oh My Zsh](https://ohmyz.sh/) themes.
 Simpler to maintain, no external dependencies, and full control over what it
 displays. The prompt shows error status, optional tag, Python virtualenv,
 directory, and git info:
@@ -468,7 +468,7 @@ export GIT_SSH_COMMAND='ssh -4 \
 
 ### b) FZF with ripgrep
 
-FZF uses ripgrep as backend and has minimal colors:
+[FZF](https://github.com/junegunn/fzf) uses [ripgrep](https://github.com/BurntSushi/ripgrep) as backend and has minimal colors:
 
 ```zsh
 bindkey '^W' fzf-history-widget  # Ctrl+W for history
@@ -548,7 +548,7 @@ dip() {
 
 ### e) Tailscale with FZF
 
-FZF-powered device selection for Tailscale operations:
+FZF-powered device selection for [Tailscale](https://tailscale.com/) operations:
 
 ```zsh
 _ts_select_device() {
@@ -593,7 +593,7 @@ mkdir -p "$@" && cd "$@" || return
 ## Wrapping up
 
 The philosophy behind this configuration is to rely on ZSH\'s built-in features
-rather than frameworks or heavy extensions. No Oh My Zsh, no Prezto, no plugin
+rather than frameworks or heavy extensions. No Oh My Zsh, no [Prezto](https://github.com/sorin-ionescu/prezto), no plugin
 managers. Just plain shell scripts that I understand and control. Keep it
 simple, keep it fast, and customize it precisely to my workflow.
 

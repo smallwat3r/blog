@@ -9,11 +9,11 @@ lastmod: 2026-01-24T16:33
 
 The [Smallcat (@4f5801b)](https://github.com/smallwat3r/smallcat/tree/4f5801b) is a 26-key keyboard I
 designed. Named after my cat Lila, who acts as a muse through a silkscreen on
-the PCB, it\'s a diodeless, column-staggered keyboard using low-profile Choc
+the PCB, it's a diodeless, column-staggered keyboard using low-profile Choc
 switches.
 
-It comes in two versions: split (two RP2040-Zero controllers connected via TRRS)
-and unibody (single RP2040 Pro Micro).
+It comes in two versions: split (two [RP2040-Zero](https://www.waveshare.com/rp2040-zero.htm)
+controllers connected via TRRS) and unibody (single RP2040 Pro Micro).
 
 26 keys is not a lot. To make it work, the [QMK keymap (@d9dc6c4)](https://github.com/smallwat3r/qmk-keymap/tree/d9dc6c4) relies heavily on layers,
 combos, and tap-hold keys. This post walks through some of the interesting

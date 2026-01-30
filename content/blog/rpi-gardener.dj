@@ -118,7 +118,7 @@ Two separate I2C buses keep things organized: the RPi's bus (GPIO2/GPIO3) handle
 the main OLED and LCD, while the Pico's bus (GP0/GP1) drives its own OLED. This
 avoids address conflicts and keeps the microcontrollers independent.
 
-The repository includes KiCad source files and manufacturing Gerbers. Upload
+The repository includes [KiCad](https://www.kicad.org/) source files and manufacturing Gerbers. Upload
 `gerber.zip` to JLCPCB or PCBWay and you'll have boards in a week for a few
 pounds.
 
@@ -128,7 +128,7 @@ A matching case holds everything together. The base plate (90mm x 62mm) has
 ventilation slots and a cable cutout. The display plate (90mm x 100mm) mounts
 both OLEDs and the LCD with proper cutouts, plus a tab for the DHT22 sensor.
 
-OpenSCAD source files are included, so dimensions can be adjusted if you're
+[OpenSCAD](https://openscad.org/) source files are included, so dimensions can be adjusted if you're
 using different display sizes or want to modify the layout. STL files are
 pre-generated for direct printing.
 
@@ -142,14 +142,16 @@ makes it cleaner and more reliable for long-term use.
 ## III. Software architecture
 
 The software follows a microservices pattern, with multiple processes
-coordinated by supervisord inside a single Docker container.
+coordinated by [supervisord](http://supervisord.org/) inside a single
+[Docker](https://www.docker.com/) container.
 
 Eight services run concurrently: two polling services (one for the DHT22 sensor,
 one for Pico serial), the [Starlette](https://www.starlette.io/) web server, a notification dispatcher, a
 smart plug controller, two display renderers (OLED and LCD), and a cron job for
 database cleanup.
 
-These services communicate through Redis pub/sub rather than direct calls. When
+These services communicate through [Redis](https://redis.io/) pub/sub rather than
+direct calls. When
 the DHT22 polling service reads a new temperature, it publishes a
 `dht.reading` event. The web server subscribes to this topic and streams it to
 connected browsers via [SSE (Server-Sent
@@ -258,7 +260,7 @@ reconnection with exponential backoff to handle Redis restarts gracefully.
 
 ## IV. Database design
 
-SQLite is the database. For a plant monitoring system writing a few readings
+[SQLite](https://sqlite.org/) is the database. For a plant monitoring system writing a few readings
 every two seconds, it's more than sufficient. No need for PostgreSQL or MySQL,
 SQLite runs in-process, requires zero configuration, and the entire database is
 a single file that's easy to backup or inspect.
@@ -518,7 +520,8 @@ debugging, and the baseline isn't updated with spike values.
 
 ## VIII. Real-time web dashboard
 
-The frontend is a Preact SPA with TypeScript, using SSE for real-time updates.
+The frontend is a [Preact](https://preactjs.com/) SPA with TypeScript, using SSE
+for real-time updates.
 SSE was chosen over WebSockets because the data flow is one-way: the server
 pushes readings to the browser, but the browser never needs to send data back.
 SSE is simpler to implement, works over standard HTTP, and handles reconnection
@@ -554,7 +557,7 @@ async def _event_generator(
 ```
 
 On connection, clients receive the latest reading immediately, then stream
-updates as they arrive. The dashboard shows live charts using echarts, with
+updates as they arrive. The dashboard shows live charts using [ECharts](https://echarts.apache.org/), with
 time-range filters (1h, 6h, 24h, 7d) and min/max/avg statistics.
 
 An admin interface (behind HTTP Basic Auth) allows adjusting thresholds,
@@ -633,7 +636,7 @@ on failure with a 3-retry limit.
 
 The compose stack includes:
 
-- **nginx**, reverse proxy with SSL termination (self-signed certs)
+- **[nginx](https://nginx.org/)**, reverse proxy with SSL termination (self-signed certs)
 - **redis**, event bus for pub/sub
 - **app**, the main application container
 
@@ -643,7 +646,7 @@ Volumes persist the SQLite database and SSL certificates across restarts.
 
 ### a) Environment variables
 
-All settings are environment variables validated by Pydantic at startup:
+All settings are environment variables validated by [Pydantic](https://docs.pydantic.dev/) at startup:
 
 ```sh
 # Thresholds

@@ -226,7 +226,7 @@ movements possible without leaving insert mode:
 ## VI. Terminal integration
 
 The terminal module configures [vterm](https://github.com/akermu/emacs-libvterm)
-and TRAMP for remote file access.
+and [TRAMP](https://www.gnu.org/software/tramp/) for remote file access.
 
 ### a) SSH config parsing
 
@@ -360,7 +360,7 @@ function when it\'s injected, so paths automatically resolve to the remote host.
 
 ## VII. Git and Magit extensions
 
-Magit gets several quality-of-life improvements. First, the [h]{.kbd} and
+[Magit](https://magit.vc/) gets several quality-of-life improvements. First, the [h]{.kbd} and
 [l]{.kbd} keys are unbound so they work for cursor movement in Evil mode:
 
 ```lisp
@@ -445,7 +445,7 @@ The [PET](https://github.com/wyuenho/emacs-pet/) package automatically finds the
 correct Python executable for each project, whether it\'s from virtualenv,
 poetry, or pyenv.
 
-Flycheck runs on-demand rather than automatically. I find constant linting
+[Flycheck](https://www.flycheck.org/) runs on-demand rather than automatically. I find constant linting
 distracting, so it\'s triggered explicitly when needed:
 
 ```lisp
@@ -571,7 +571,7 @@ or 5 columns at a time rather than Emacs defaults:
 
 ### a) Wayland environment propagation
 
-When running Emacs as a daemon under Sway, subprocesses (like Magit\'s git
+When running Emacs as a daemon under [Sway](https://swaywm.org/), subprocesses (like Magit\'s git
 hooks) can\'t access Wayland because the daemon started without those
 environment variables. This hook pulls Wayland vars from new emacsclient frames
 into the daemon\'s environment:
