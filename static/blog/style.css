@@ -38,7 +38,7 @@ article section > :is(h2, h3):hover > a::after { opacity: 1; }
 }
 
 /* Code */
-pre, code, kbd { font-size: 14px; }
+pre, code, kbd { font-size: 15px; }
 @media (min-width: 768px) {
   pre, code, kbd { font-size: 16px; }
 }
