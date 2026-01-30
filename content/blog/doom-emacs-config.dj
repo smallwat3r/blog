@@ -11,8 +11,7 @@ lastmod: 2026-01-24T16:33
 years of tweaking, my configuration has evolved into something quite personal, a
 blend of Doom\'s sensible defaults and custom modules tailored to my workflow.
 
-This post walks through the interesting parts of my [Doom
-config](https://github.com/smallwat3r/dotfiles/tree/main/base/.doom.d),
+This post walks through the interesting parts of my [Doom config (@7e20928)](https://github.com/smallwat3r/dotfiles/tree/7e20928/base/.doom.d),
 explaining the design decisions and useful hacks I\'ve accumulated.
 
 ## I. Config structure
@@ -78,7 +77,7 @@ concern. The ones ending in `-ext` are extensions of existing Doom modules:
 - **tools**, misc utilities
 - etc
 
-The full list is in my [doom config](https://github.com/smallwat3r/dotfiles/tree/main/base/.doom.d).
+The full list is in my [doom init file (@7e20928)](https://github.com/smallwat3r/dotfiles/blob/7e20928/base/.doom.d/init.el).
 
 ## III. Visual configuration
 
@@ -662,7 +661,7 @@ becomes an extension of thought rather than a tool you fight against.
 
 ## Links
 
-- [My dotfiles](https://github.com/smallwat3r/dotfiles), full configuration
+- [My dotfiles (@7e20928)](https://github.com/smallwat3r/dotfiles/tree/7e20928), full configuration
   including Doom Emacs
 - [Doom Emacs](https://github.com/doomemacs/doomemacs), the Emacs distribution
 - [Creamy theme](https://github.com/smallwat3r/emacs-creamy-theme), the warm,

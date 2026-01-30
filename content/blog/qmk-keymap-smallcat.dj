@@ -7,7 +7,7 @@ lastmod: 2026-01-24T16:33
 
 ## Introduction
 
-The [Smallcat](https://github.com/smallwat3r/smallcat) is a 26-key keyboard I
+The [Smallcat (@4f5801b)](https://github.com/smallwat3r/smallcat/tree/4f5801b) is a 26-key keyboard I
 designed. Named after my cat Lila, who acts as a muse through a silkscreen on
 the PCB, it\'s a diodeless, column-staggered keyboard using low-profile Choc
 switches.
@@ -15,8 +15,7 @@ switches.
 It comes in two versions: split (two RP2040-Zero controllers connected via TRRS)
 and unibody (single RP2040 Pro Micro).
 
-26 keys is not a lot. To make it work, the [QMK
-keymap](https://github.com/smallwat3r/qmk-keymap) relies heavily on layers,
+26 keys is not a lot. To make it work, the [QMK keymap (@d9dc6c4)](https://github.com/smallwat3r/qmk-keymap/tree/d9dc6c4) relies heavily on layers,
 combos, and tap-hold keys. This post walks through some of the interesting
 design choices.
 
@@ -423,7 +422,8 @@ my machine, fully customised and optimised to my workflow, is truly amazing.
 
 ## Links
 
-- [Smallcat keyboard](https://github.com/smallwat3r/smallcat), hardware files
-  and build guide
-- [My QMK keymap](https://github.com/smallwat3r/qmk-keymap), full source code
+- [Smallcat keyboard (@4f5801b)](https://github.com/smallwat3r/smallcat/tree/4f5801b),
+  hardware files and build guide
+- [My QMK keymap (@d9dc6c4)](https://github.com/smallwat3r/qmk-keymap/tree/d9dc6c4),
+  full source code
 - [QMK firmware](https://qmk.fm/), the open source keyboard firmware
