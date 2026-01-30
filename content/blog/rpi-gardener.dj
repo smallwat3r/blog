@@ -145,7 +145,7 @@ The software follows a microservices pattern, with multiple processes
 coordinated by supervisord inside a single Docker container.
 
 Eight services run concurrently: two polling services (one for the DHT22 sensor,
-one for Pico serial), the Starlette web server, a notification dispatcher, a
+one for Pico serial), the [Starlette](https://www.starlette.io/) web server, a notification dispatcher, a
 smart plug controller, two display renderers (OLED and LCD), and a cron job for
 database cleanup.
 
@@ -365,7 +365,7 @@ The admin UI allows adjusting retention from 1 to 365 days.
 
 ## V. The Pico firmware
 
-The Pico runs MicroPython and handles soil moisture sensing. It reads three
+The Pico runs [MicroPython](https://micropython.org/) and handles soil moisture sensing. It reads three
 capacitive sensors, converts ADC values to percentages, displays them on an
 OLED, and sends JSON over USB serial:
 
@@ -748,6 +748,3 @@ build the same thing or adapt it to their needs.
   source code and hardware files
 - [Raspberry Pi Documentation](https://www.raspberrypi.com/documentation/),
   official guides
-- [Starlette](https://www.starlette.io/), the ASGI framework used for the web
-  server
-- [MicroPython](https://micropython.org/), Python for microcontrollers
