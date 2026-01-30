@@ -38,7 +38,10 @@ article section > :is(h2, h3):hover > a::after { opacity: 1; }
 }
 
 /* Code */
-pre, code, kbd { font-size: 16px; }
+pre, code, kbd { font-size: 14px; }
+@media (min-width: 768px) {
+  pre, code, kbd { font-size: 16px; }
+}
 code { background-color: var(--color-code-bg); padding: 0.1em 0.3em; }
 pre { background-color: var(--color-code-bg); padding: 1em; overflow-x: auto; margin: 1em 0; line-height: 1.4; max-width: 100%; box-sizing: border-box; }
 pre code { padding: 0; }
