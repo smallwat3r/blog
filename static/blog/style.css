@@ -64,6 +64,9 @@ code span.wa, code span.al, code span.er { color: #EE2C2C; font-weight: bold; }
 /* TOC */
 .toc { display: none; }
 
+/* Images */
+article img { display: block; margin: 1em auto; max-width: 100%; height: auto; }
+
 /* Responsive */
 @media (min-width: 768px) {
   .back-link { margin-bottom: 0; }

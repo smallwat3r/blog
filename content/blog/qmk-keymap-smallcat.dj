@@ -12,8 +12,14 @@ designed. Named after my cat Lila, who acts as a muse through a silkscreen on
 the PCB, it's a diodeless, column-staggered keyboard using low-profile Choc
 switches.
 
+![Lila the cat, who figures on the Smallcat keyboard silkscreen](../images/qmk-keymap-smallcat/lila.webp)
+
 It comes in two versions: split (two [RP2040-Zero](https://www.waveshare.com/rp2040-zero.htm)
 controllers connected via TRRS) and unibody (single RP2040 Pro Micro).
+
+![Smallcat split keyboard with two halves connected via TRRS cable](../images/qmk-keymap-smallcat/smallcat-split.webp)
+
+![Smallcat unibody keyboard with single RP2040 Pro Micro controller](../images/qmk-keymap-smallcat/smallcat-uni.webp)
 
 26 keys is not a lot. To make it work, the [QMK keymap (@d9dc6c4)](https://github.com/smallwat3r/qmk-keymap/tree/d9dc6c4) relies heavily on layers,
 combos, and tap-hold keys. This post walks through some of the interesting
