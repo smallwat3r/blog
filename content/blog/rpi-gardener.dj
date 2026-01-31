@@ -173,7 +173,7 @@ aren't needed, that service simply doesn't start. If there's no LCD connected,
 the LCD service exits cleanly at startup.
 
 Persistent data lives in SQLite, sensor readings, settings, and admin
-credentials. The database uses WAL mode for concurrent reads during polling and
+credentials. The database uses [WAL](https://en.wikipedia.org/wiki/Write-ahead_logging) mode for concurrent reads during polling and
 web requests.
 
 ### a) The polling service pattern
