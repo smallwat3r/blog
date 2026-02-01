@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block description %}{{page.description}}{% endblock %}
-{% block canonical %}https://smallwat3r.com/{{page.slug}}.html{% endblock %}
+{% block canonical %}https://smallwat3r.com/{{page.slug}}{% endblock %}
 {% block title %}{{page.title}} - smallwat3r{% endblock %}
 
 {% block meta %}
+    <meta property="og:site_name" content="smallwat3r">
     <meta property="og:title" content="{{page.title}} - smallwat3r">
     <meta property="og:description" content="{{page.description}}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://smallwat3r.com/{{page.slug}}.html">
+    <meta property="og:url" content="https://smallwat3r.com/{{page.slug}}">
 {% endblock %}
 
 {% block structured_data %}
