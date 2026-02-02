@@ -750,13 +750,9 @@ pattern makes adding new components simple.
 
 ## Wrapping up
 
-Building this system was a fun blend of hardware and software challenges.
-Calibrating sensors, designing the alert hysteresis, getting SSE streaming
-right, each problem taught something new.
-
-The real satisfaction comes from the practical result: happy plants, fewer
-forgotten waterings, a dashboard to show off, and a happy girlfriend. Open source means anyone can
-build the same thing or adapt it to their needs.
+Building this system was a fun blend of hardware and software challenges, and
+now I have happy plants, fewer forgotten waterings, a dashboard to show off,
+and a happy girlfriend.
 
 ## Links
 
