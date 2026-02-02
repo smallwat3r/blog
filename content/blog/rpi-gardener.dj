@@ -12,7 +12,7 @@ watering needs, some like it dry, some need constant moisture, and remembering
 which is which became a challenge. After one too many wilted leaves, I decided
 to build something to help.
 
-The result is [RPi Gardener (@0056c75)](https://github.com/smallwat3r/rpi-gardener),
+The result is [RPi Gardener ([0056c75]{.commit})](https://github.com/smallwat3r/rpi-gardener),
 a plant monitoring system built around a Raspberry Pi 4. It tracks temperature,
 humidity, and soil moisture for multiple plants, displays readings on a web
 dashboard, and sends notifications when something needs attention.
@@ -756,7 +756,7 @@ and a happy girlfriend.
 
 ## Links
 
-- [RPi Gardener (@0056c75)](https://github.com/smallwat3r/rpi-gardener), full
-  source code and hardware files
+- [RPi Gardener ([0056c75]{.commit})](https://github.com/smallwat3r/rpi-gardener),
+  full source code and hardware files
 - [Raspberry Pi Documentation](https://www.raspberrypi.com/documentation/),
   official guides
