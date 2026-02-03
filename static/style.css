@@ -3,7 +3,7 @@
   --color-text-muted: #666;
   --color-scrollbar: #c4b494;
   --color-scrollbar-hover: #a89868;
-  --color-code-bg: #e8d9b5;
+  --color-code-bg: rgba(232, 217, 181, 0.5);
   --color-border: #d9cba8;
 }
 
