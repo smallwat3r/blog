@@ -11,7 +11,7 @@ lastmod: 2026-02-01T12:00
 years of tweaking, my configuration has evolved into something quite personal, a
 blend of Doom\'s sensible defaults and custom modules tailored to my workflow.
 
-This post walks through the interesting parts of my [Doom config ([7e20928]{.commit})](https://github.com/smallwat3r/dotfiles/tree/7e20928/base/.doom.d),
+This post walks through the interesting parts of my [Doom config [(7e20928)]{.commit}](https://github.com/smallwat3r/dotfiles/tree/7e20928/base/.doom.d),
 explaining the design decisions and useful hacks I\'ve accumulated.
 
 ## I. Config structure
@@ -77,7 +77,7 @@ concern. The ones ending in `-ext` are extensions of existing Doom modules:
 - **tools**, misc utilities
 - etc
 
-The full list is in my [doom init file ([7e20928]{.commit})](https://github.com/smallwat3r/dotfiles/blob/7e20928/base/.doom.d/init.el).
+The full list is in my [doom init file [(7e20928)]{.commit}](https://github.com/smallwat3r/dotfiles/blob/7e20928/base/.doom.d/init.el).
 
 ## III. Visual configuration
 
@@ -661,7 +661,7 @@ becomes an extension of thought rather than a tool you fight against.
 
 ## Links
 
-- [My dotfiles ([7e20928]{.commit})](https://github.com/smallwat3r/dotfiles/tree/7e20928), full configuration
+- [My dotfiles [(7e20928)]{.commit}](https://github.com/smallwat3r/dotfiles/tree/7e20928), full configuration
   including Doom Emacs
 - [Doom Emacs](https://github.com/doomemacs/doomemacs), the Emacs distribution
 - [Creamy theme](https://github.com/smallwat3r/emacs-creamy-theme), the warm,

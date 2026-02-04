@@ -9,7 +9,7 @@ lastmod: 2026-02-01T12:00
 
 ZSH has been my shell of choice for a long time. Along the way, my configuration
 has accumulated a collection of hacks, tricks, and quality-of-life improvements.
-This post walks through the interesting parts of my [ZSH config ([7e20928]{.commit})](https://github.com/smallwat3r/dotfiles/tree/7e20928/base), focusing on the
+This post walks through the interesting parts of my [ZSH config [(7e20928)]{.commit}](https://github.com/smallwat3r/dotfiles/tree/7e20928/base), focusing on the
 non-obvious bits that make daily shell work smoother.
 
 ## I. Config structure
@@ -599,7 +599,7 @@ simple, keep it fast, and customize it precisely to my workflow.
 
 ## Links
 
-- [My dotfiles ([7e20928]{.commit})](https://github.com/smallwat3r/dotfiles/tree/7e20928), full configuration
+- [My dotfiles [(7e20928)]{.commit}](https://github.com/smallwat3r/dotfiles/tree/7e20928), full configuration
   including ZSH
 - [ZSH documentation](https://zsh.sourceforge.io/Doc/), the official reference
 - [zsh-users](https://github.com/zsh-users), community plugins and completions
