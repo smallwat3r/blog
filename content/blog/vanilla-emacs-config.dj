@@ -21,7 +21,7 @@ walks through the interesting parts of my [vanilla Emacs config
 explaining the design decisions and what I kept, discarded, or improved from
 Doom.
 
-![vanilla Emacs setup with creamy theme and custom modeline](../images/vanilla-emacs-config/smallwat3r-emacs.webp)
+![my vanilla Emacs setup](../images/vanilla-emacs-config/smallwat3r-emacs.webp)
 
 ## I. Why leave Doom
 
