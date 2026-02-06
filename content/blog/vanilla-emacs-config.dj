@@ -1,5 +1,5 @@
 ---
-title: Moving to Vanilla Emacs
+title: Moving to vanilla Emacs
 description: Why I left Doom Emacs for a hand-rolled config. Covers Elpaca, deferred loading, a minimal modeline, project.el, workspaces with tab-bar, Eat terminal, and the philosophy of building something simple from scratch.
 date: 2026-02-06T09:30
 tags: emacs, dotfiles
@@ -16,12 +16,12 @@ top.
 
 So I started over. Not with another distribution, but with a blank `init.el`
 and a clear goal: build something minimal, fast, and entirely mine. This post
-walks through the interesting parts of my [Vanilla Emacs config
+walks through the interesting parts of my [vanilla Emacs config
 [(0052257)]{.commit}](https://github.com/smallwat3r/emacs/tree/0052257),
 explaining the design decisions and what I kept, discarded, or improved from
 Doom.
 
-![Vanilla Emacs setup with creamy theme and custom modeline](../images/vanilla-emacs-config/smallwat3r-emacs.webp)
+![vanilla Emacs setup with creamy theme and custom modeline](../images/vanilla-emacs-config/smallwat3r-emacs.webp)
 
 ## I. Why leave Doom
 
@@ -289,7 +289,7 @@ configuration:
 
 Here is what it looks like, the creamy theme with warm-mode applied.
 
-![Creamy theme with warm-mode](../images/vanilla-emacs-config/creamy-enabled.webp)
+![Creamy theme with warm-mode](../images/vanilla-emacs-config/warm-mode.webp)
 
 The font is Monaco (or [MonacoB](https://github.com/vjpr/monaco-bold) on
 Linux). It is the font I originally
@@ -1023,7 +1023,7 @@ how little you actually need.
 ## Links
 
 - [My Emacs config [(0052257)]{.commit}](https://github.com/smallwat3r/emacs/tree/0052257),
-  the full Vanilla Emacs configuration
+  the full vanilla Emacs configuration
 - [Doom Emacs config](doom-emacs-config.html), the previous setup this
   replaces
 - [Elpaca](https://github.com/progfolio/elpaca), the package manager
