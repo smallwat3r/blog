@@ -73,20 +73,7 @@ Each module in `lisp/` handles a single concern:
 (require 'sw-evil)
 (require 'sw-modeline)
 (require 'sw-completion)
-(require 'sw-project)
-(require 'sw-git)
-(require 'sw-terminal)
-(require 'sw-tailscale)
-(require 'sw-dired)
-(require 'sw-filetypes)
-(require 'sw-org)
-(require 'sw-programming)
-(require 'sw-eglot)
-(require 'sw-tools)
-(require 'sw-claude)
-(require 'sw-workspaces)
-(require 'sw-keybindings)
-(require 'sw-dashboard)
+; ...
 ```
 
 This is deliberately simpler than Doom's module system. No `config.el` vs

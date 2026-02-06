@@ -37,6 +37,13 @@ article section > :is(h2, h3):hover > a::after { opacity: 1; }
   }
 }
 
+/* External links */
+a.external::after {
+  content: " \2197";
+  font-size: 0.75em;
+  color: var(--color-text-muted);
+}
+
 /* Code */
 pre, code, kbd { font-size: 15px; }
 @media (min-width: 768px) {

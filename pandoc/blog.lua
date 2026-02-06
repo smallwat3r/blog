@@ -4,6 +4,7 @@
 --   Image: Copies alt text to title attribute for hover tooltips
 --   CodeBlock: Wraps in div with copy button (click handler in blog.js)
 --   Div: Converts djot sections to <section> elements with anchor links
+--   Link: Adds "external" class to external links
 
 local function html(s)
   return pandoc.RawBlock("html", s)
@@ -16,6 +17,14 @@ local function wrap(open, content, close)
   end
   blocks[#blocks + 1] = html(close)
   return blocks
+end
+
+-- Adds "external" class to links pointing outside the blog.
+function Link(el)
+  if el.target:match("^https?://") then
+    el.classes:insert("external")
+  end
+  return el
 end
 
 -- Sets image title from alt text so it shows on hover.
