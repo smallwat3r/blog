@@ -3,6 +3,7 @@ title: Plant monitoring with Raspberry Pi
 description: A deep dive into building a plant monitoring system using a Raspberry Pi 4 and Pico. Covers hardware setup, software architecture, real-time data streaming, alert system, and Docker deployment.
 date: 2026-01-30T12:00
 lastmod: 2026-02-01T12:00
+tags: hardware, python
 ---
 
 ## Introduction

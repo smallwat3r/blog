@@ -3,6 +3,7 @@ title: A modular ZSH setup
 description: A walkthrough of my modular ZSH configuration. Covers performance optimizations, custom prompt with git status, completion system, plugins, and tool-specific helpers.
 date: 2025-12-01T09:15
 lastmod: 2026-02-01T12:00
+tags: zsh, dotfiles
 ---
 
 ## Introduction

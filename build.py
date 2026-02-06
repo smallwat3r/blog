@@ -30,6 +30,7 @@ class Content:
     lastmod: str
     body: str
     read_time: int = 0
+    tags: tuple[str, ...] = ()
 
 
 def calc_read_time(html: str) -> int:
@@ -57,6 +58,7 @@ def collect_content(path: Path, prefix: str = "") -> Content:
             raise SystemExit(f"Error: {path} missing required field: {field}")
     slug = path.stem
     body = (BUILD / prefix / f"{slug}.html").read_text()
+    tags = tuple(t.strip() for t in meta.get("tags", "").split(",") if t.strip())
     return Content(
         slug=slug,
         path=f"{prefix}{slug}.html",
@@ -66,6 +68,7 @@ def collect_content(path: Path, prefix: str = "") -> Content:
         lastmod=meta.get("lastmod", meta["date"]),
         body=body,
         read_time=calc_read_time(body),
+        tags=tags,
     )
 
 
@@ -102,6 +105,7 @@ def build() -> None:
         key=attrgetter("date"),
         reverse=True,
     )
+    all_tags = sorted({t for p in posts for t in p.tags})
     about = collect_content(CONTENT / "about.dj")
     index = collect_content(CONTENT / "index.dj")
 
@@ -109,7 +113,8 @@ def build() -> None:
     for post in posts:
         write(f"blog/{post.slug}.html", env.get_template("blog.html").render(post=post))
     write("about.html", env.get_template("about.html").render(page=about))
-    write("index.html", env.get_template("index.html").render(index=index, posts=posts))
+    write("index.html",
+          env.get_template("index.html").render(index=index, posts=posts, tags=all_tags))
     write("sitemap.xml", env.get_template("sitemap.xml").render(
         posts=posts, about=about, index=index))
     write("feed.xml", env.get_template("feed.xml").render(posts=posts, index=index))

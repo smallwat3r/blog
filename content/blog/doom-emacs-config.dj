@@ -3,6 +3,7 @@ title: Configuring Doom Emacs
 description: A deep dive into my Doom Emacs configuration. Covers custom modules, Evil keybindings, terminal integration, and various hacks for a productive workflow.
 date: 2026-01-23T09:30
 lastmod: 2026-02-01T12:00
+tags: emacs, dotfiles
 ---
 
 ## Introduction
