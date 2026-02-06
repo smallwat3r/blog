@@ -1,6 +1,7 @@
 -- Pandoc Lua filter for blog post transformations.
 --
 -- Transforms:
+--   Image: Copies alt text to title attribute for hover tooltips
 --   CodeBlock: Wraps in div with copy button (click handler in blog.js)
 --   Div: Converts djot sections to <section> elements with anchor links
 
@@ -15,6 +16,15 @@ local function wrap(open, content, close)
   end
   blocks[#blocks + 1] = html(close)
   return blocks
+end
+
+-- Sets image title from alt text so it shows on hover.
+function Image(el)
+  local alt = pandoc.utils.stringify(el.caption)
+  if alt ~= "" then
+    el.title = alt
+  end
+  return el
 end
 
 -- Wraps code blocks in a div with a copy button.
