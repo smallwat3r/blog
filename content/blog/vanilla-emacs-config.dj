@@ -17,7 +17,7 @@ top.
 So I started over. Not with another distribution, but with a blank `init.el`
 and a clear goal: build something minimal, fast, and entirely mine. This post
 walks through the interesting parts of my [vanilla Emacs config
-[(0052257)]{.commit}](https://github.com/smallwat3r/emacs/tree/0052257),
+[(5570fb3)]{.commit}](https://github.com/smallwat3r/emacs/tree/5570fb3),
 explaining the design decisions and what I kept, discarded, or improved from
 Doom.
 
@@ -555,18 +555,16 @@ Normal state gets Vim-style navigation, [p]{.kbd} to paste from kill ring,
 [dd]{.kbd} to send [C-c]{.kbd}, and [RET]{.kbd} to enter insert:
 
 ```lisp
-(general-define-key
- :keymaps 'eat-mode-map
- :states 'normal
- "B" 'beginning-of-line
- "E" 'end-of-line
- "G" 'end-of-buffer
- "gg" 'beginning-of-buffer
- "C-u" 'evil-scroll-up
- "C-d" 'evil-scroll-down
- "RET" 'evil-insert-state
- "dd" 'sw-eat-interrupt
- "p" 'sw-eat-yank)
+(evil-define-key* 'normal eat-mode-map
+  (kbd "B")   #'beginning-of-line
+  (kbd "E")   #'end-of-line
+  (kbd "G")   #'end-of-buffer
+  (kbd "gg")  #'beginning-of-buffer
+  (kbd "C-u") #'evil-scroll-up
+  (kbd "C-d") #'evil-scroll-down
+  (kbd "RET") #'evil-insert-state
+  (kbd "dd")  #'sw-eat-interrupt
+  (kbd "p")   #'sw-eat-yank)
 ```
 
 ### b) ZSH history integration
@@ -779,23 +777,30 @@ through [SPC TAB 9]{.kbd} jump directly to a workspace:
 ## X. Keybindings and Evil
 
 The Evil setup follows the same pattern as Doom: [SPC]{.kbd} as leader,
-[general.el](https://github.com/noctuid/general.el) for definitions,
 [which-key](https://github.com/justbur/emacs-which-key) for
 discoverability (built into Emacs since version 30).
 I used Doom for so long that its keybinding conventions are burned into
 my muscle memory, and they were great to begin with, so I kept them.
 
-```lisp
-(general-create-definer sw-leader
-  :states '(normal visual motion)
-  :keymaps 'override
-  :prefix "SPC"
-  :global-prefix "C-SPC")
+The leader key plumbing uses a plain keymap bound to [SPC]{.kbd} in
+Evil's normal, visual and motion states, with [C-SPC]{.kbd} as global
+fallback. No third-party package needed:
 
-(general-create-definer sw-local-leader
-  :states '(normal visual motion)
-  :prefix "SPC m"
-  :global-prefix "C-SPC m")
+```lisp
+(defvar sw-leader-map (make-sparse-keymap)
+  "Keymap for SPC leader bindings.")
+
+(define-minor-mode sw-leader-mode
+  "Global minor mode providing SPC as leader key."
+  :global t :lighter nil
+  :keymap (make-sparse-keymap))
+
+(sw-leader-mode 1)
+
+(evil-define-key* '(normal visual motion)
+  sw-leader-mode-map
+  (kbd "SPC") sw-leader-map)
+(global-set-key (kbd "C-SPC") sw-leader-map)
 ```
 
 The major prefix groups mirror Doom's layout closely, [SPC b]{.kbd} for
@@ -809,22 +814,31 @@ window navigation needs both HJKL and YNAE bindings. A macro generates
 both from a single definition:
 
 ```lisp
-(defmacro sw-define-window-nav-keys (prefix label)
-  "Define window nav bindings under PREFIX."
-  (let ((p prefix))
-    `(sw-leader
-       ,(concat p " <left>") '(evil-window-left :wk "Window left")
-       ,(concat p " <right>") '(evil-window-right :wk "Window right")
-       ,(concat p " <up>") '(evil-window-up :wk "Window up")
-       ,(concat p " <down>") '(evil-window-down :wk "Window down")
-       ;; YNAE keys (custom keyboard layout)
-       ,(concat p "y") '(evil-window-left :wk "Window left")
-       ,(concat p "n") '(evil-window-down :wk "Window down")
-       ,(concat p "a") '(evil-window-up :wk "Window up")
-       ,(concat p "e") '(evil-window-right :wk "Window right")
-       ;; Splits (auto-select new window)
-       ,(concat p "v") '(sw-split-window-right :wk "Split right")
-       ,(concat p "s") '(sw-split-window-below :wk "Split below"))))
+(defun sw-define-window-nav-keys (prefix label)
+  "Define window navigation bindings under PREFIX
+with LABEL."
+  (sw-define-keys sw-leader-map
+    `((,prefix nil ,label)
+      (,(concat prefix " <left>")
+       evil-window-left "Window left")
+      (,(concat prefix " <right>")
+       evil-window-right "Window right")
+      (,(concat prefix " <up>")
+       evil-window-up "Window up")
+      (,(concat prefix " <down>")
+       evil-window-down "Window down")
+      (,(concat prefix " y")
+       evil-window-left "Window left")
+      (,(concat prefix " n")
+       evil-window-down "Window down")
+      (,(concat prefix " a")
+       evil-window-up "Window up")
+      (,(concat prefix " e")
+       evil-window-right "Window right")
+      (,(concat prefix " v")
+       sw-split-window-right "Split right")
+      (,(concat prefix " s")
+       sw-split-window-below "Split below"))))
 
 (sw-define-window-nav-keys "w" "Window")
 (sw-define-window-nav-keys "l" "Window")
@@ -1010,7 +1024,7 @@ how little you actually need.
 
 ## Links
 
-- [My Emacs config [(0052257)]{.commit}](https://github.com/smallwat3r/emacs/tree/0052257),
+- [My Emacs config [(5570fb3)]{.commit}](https://github.com/smallwat3r/emacs/tree/5570fb3),
   the full vanilla Emacs configuration
 - [Doom Emacs config](doom-emacs-config.html), the previous setup this
   replaces
