@@ -826,7 +826,7 @@ both from a single definition:
        ,(concat p "s") '(sw-split-window-below :wk "Split below"))))
 
 (sw-define-window-nav-keys "w" "Window")
-(sw-define-window-nav-keys "l" "Select window")
+(sw-define-window-nav-keys "l" "Window")
 ```
 
 ### b) Symbol highlighting
