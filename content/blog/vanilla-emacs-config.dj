@@ -845,6 +845,23 @@ buffer group looks like:
 The major prefix groups mirror Doom's layout closely, [SPC b]{.kbd} for
 buffers, [SPC f]{.kbd} for files, [SPC g]{.kbd} for git, [SPC s]{.kbd}
 for search, [SPC p]{.kbd} for projects, [SPC w]{.kbd} for windows.
+[SPC m]{.kbd} dispatches to mode-specific bindings, just like Doom's
+local leader. A `menu-item` filter looks up the current major mode
+in an alist and returns the matching keymap:
+
+```lisp
+(defvar sw-local-leader-alist nil
+  "Alist of (MODE . KEYMAP) for SPC m bindings.")
+
+(define-key sw-leader-map "m"
+  `(menu-item "Local mode" nil
+    :filter ,(lambda (&optional _)
+               (sw-local-leader-keymap))))
+```
+
+Each mode registers its own keymap. For instance, Python gets
+test runners and import sorting under [SPC m]{.kbd}, while
+Emacs Lisp gets eval commands.
 
 ### a) Window navigation macro
 
