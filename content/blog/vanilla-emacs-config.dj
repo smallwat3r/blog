@@ -782,6 +782,8 @@ discoverability (built into Emacs since version 30).
 I used Doom for so long that its keybinding conventions are burned into
 my muscle memory, and they were great to begin with, so I kept them.
 
+### a) Leader key
+
 I dropped [general.el](https://github.com/noctuid/general.el) since
 I was only using a fraction of what it offers - mostly
 `general-create-definer` and `general-define-key`, both easily
@@ -863,11 +865,11 @@ Each mode registers its own keymap. For instance, Python gets
 test runners and import sorting under [SPC m]{.kbd}, while
 Emacs Lisp gets eval commands.
 
-### a) Window navigation macro
+### b) Window navigation
 
 I use a [non-standard keyboard layout](qmk-keymap-smallcat.html#i-the-layout), so
-window navigation needs both HJKL and YNAE bindings. A macro generates
-both from a single definition:
+window navigation needs both HJKL and YNAE bindings. A helper
+generates both from a single call:
 
 ```lisp
 (defun sw-define-window-nav-keys (prefix label)
@@ -900,7 +902,7 @@ with LABEL."
 (sw-define-window-nav-keys "l" "Window")
 ```
 
-### b) Symbol highlighting
+### c) Symbol highlighting
 
 Evil's default [*]{.kbd} searches for the word at point but jumps to the
 next match. This custom version highlights the symbol at point without
