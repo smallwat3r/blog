@@ -54,11 +54,13 @@ function Div(el)
     return el
   end
 
+  local id = el.identifier:lower()
+
   local header = el.content[1]
   if header and header.t == "Header" then
-    header.identifier = el.identifier
-    header.content = {pandoc.Link(header.content, "#" .. el.identifier)}
+    header.identifier = id
+    header.content = {pandoc.Link(header.content, "#" .. id)}
   end
 
-  return wrap('<section id="' .. el.identifier .. '">', el.content, '</section>')
+  return wrap('<section id="' .. id .. '">', el.content, '</section>')
 end
