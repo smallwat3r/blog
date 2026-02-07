@@ -780,7 +780,8 @@ through [SPC TAB 9]{.kbd} jump directly to a workspace:
 
 The Evil setup follows the same pattern as Doom: [SPC]{.kbd} as leader,
 [general.el](https://github.com/noctuid/general.el) for definitions,
-[which-key](https://github.com/justbur/emacs-which-key) for discoverability.
+[which-key](https://github.com/justbur/emacs-which-key) for
+discoverability (built into Emacs since version 30).
 I used Doom for so long that its keybinding conventions are burned into
 my muscle memory, and they were great to begin with, so I kept them.
 
