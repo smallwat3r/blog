@@ -47,6 +47,14 @@ function CodeBlock(el)
   }
 end
 
+-- Lowercases header identifiers so TOC and anchor links match.
+function Header(el)
+  if el.identifier ~= "" then
+    el.identifier = el.identifier:lower()
+  end
+  return el
+end
+
 -- Converts djot section divs to HTML <section> elements.
 -- Adds anchor links to headings and restores header IDs for TOC.
 function Div(el)
