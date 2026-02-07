@@ -782,9 +782,12 @@ discoverability (built into Emacs since version 30).
 I used Doom for so long that its keybinding conventions are burned into
 my muscle memory, and they were great to begin with, so I kept them.
 
-The leader key plumbing uses a plain keymap bound to [SPC]{.kbd} in
-Evil's normal, visual and motion states, with [C-SPC]{.kbd} as global
-fallback. No third-party package needed:
+I dropped [general.el](https://github.com/noctuid/general.el) since
+I was only using a fraction of what it offers - mostly
+`general-create-definer` and `general-define-key`, both easily
+replaced by a plain keymap and `evil-define-key*`. The leader key
+plumbing binds [SPC]{.kbd} in Evil's normal, visual and motion
+states, with [C-SPC]{.kbd} as global fallback:
 
 ```lisp
 (defvar sw-leader-map (make-sparse-keymap)
@@ -809,7 +812,7 @@ for search, [SPC p]{.kbd} for projects, [SPC w]{.kbd} for windows.
 
 ### a) Window navigation macro
 
-I use a [non-standard keyboard layout](qmk-keymap-smallcat.html), so
+I use a [non-standard keyboard layout](qmk-keymap-smallcat.html#i-the-layout), so
 window navigation needs both HJKL and YNAE bindings. A macro generates
 both from a single definition:
 
