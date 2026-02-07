@@ -160,7 +160,7 @@ and skipping the regex matching on every `load` and `require` adds up:
 After startup, we need to restore sensible GC behavior, but Emacs' default
 threshold (800KB) is too aggressive for a modern config and causes frequent
 pauses during normal use.
-[GCMH](https://github.com/emacs-mirror/emacs/blob/master/lisp/emacs-lisp/gcmh.el)
+[GCMH](https://melpa.org/#/gcmh)
 solves this by raising the threshold while you are active (64MB here, high
 enough that GC rarely fires mid-keystroke) and only collecting when Emacs
 is idle. The `auto` delay adapts based on how long GC actually takes,
