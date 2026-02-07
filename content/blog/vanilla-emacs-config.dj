@@ -785,9 +785,11 @@ my muscle memory, and they were great to begin with, so I kept them.
 I dropped [general.el](https://github.com/noctuid/general.el) since
 I was only using a fraction of what it offers - mostly
 `general-create-definer` and `general-define-key`, both easily
-replaced by a plain keymap and `evil-define-key*`. The leader key
-plumbing binds [SPC]{.kbd} in Evil's normal, visual and motion
-states, with [C-SPC]{.kbd} as global fallback:
+replaced by a plain keymap and `evil-define-key*`.
+
+A global minor mode owns the leader keymap. `evil-define-key*` binds
+[SPC]{.kbd} to it in normal, visual and motion states, with
+[C-SPC]{.kbd} as global fallback:
 
 ```lisp
 (defvar sw-leader-map (make-sparse-keymap)
@@ -804,6 +806,40 @@ states, with [C-SPC]{.kbd} as global fallback:
   sw-leader-mode-map
   (kbd "SPC") sw-leader-map)
 (global-set-key (kbd "C-SPC") sw-leader-map)
+```
+
+A small helper, `sw-define-keys`, wraps `define-key` and registers
+which-key labels in one pass. Each entry is a `(KEY DEF LABEL)`
+triple, where a nil `DEF` marks a prefix-only group:
+
+```lisp
+(defun sw-define-keys (keymap bindings)
+  "Define BINDINGS in KEYMAP with which-key labels.
+BINDINGS is a list of (KEY DEF LABEL) entries.
+DEF is a command or nil (prefix-only label)."
+  (let (wk-args)
+    (dolist (b bindings)
+      (pcase-let ((`(,key ,def ,label) b))
+        (when def
+          (define-key keymap (kbd key) def))
+        (when label
+          (push key wk-args)
+          (push label wk-args))))
+    (when wk-args
+      (apply #'which-key-add-keymap-based-replacements
+             keymap (nreverse wk-args)))))
+```
+
+This keeps all bindings declarative and compact. For example, the
+buffer group looks like:
+
+```lisp
+(sw-define-keys sw-leader-map
+  '(("b"   nil "Buffer")
+    ("b b" sw-workspace-switch-buffer "Switch buffer")
+    ("b d" kill-current-buffer "Kill buffer")
+    ("b s" save-buffer "Save buffer")
+    ...))
 ```
 
 The major prefix groups mirror Doom's layout closely, [SPC b]{.kbd} for
