@@ -62,7 +62,8 @@ multiple runs:
 ```zsh
 # ~/.zsh/functions/timezsh (autoloaded)
 zmodload zsh/datetime
-local runs=${1:-10} total_ms=0 i start end delta_ms
+runs=${1:-10}
+total_ms=0
 
 for i in {1..$runs}; do
   start=$EPOCHREALTIME
