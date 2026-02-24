@@ -81,12 +81,12 @@ article img { display: block; margin: 1em auto; max-width: 100%; height: auto; }
   h1 { padding-right: 0; }
   .date { font-size: 17px; }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1500px) {
   .toc {
     display: block;
     position: fixed;
     top: 15px;
-    left: calc(40px + 750px + 40px);
+    left: calc(10vw + 805px);
     width: 320px;
     font-size: 13px;
     line-height: 0.95;

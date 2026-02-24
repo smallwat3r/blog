@@ -66,6 +66,10 @@ footer { margin-top: 0; padding-top: 0; }
   .index li .date { flex-shrink: 0; }
 }
 
+@media (min-width: 1200px) {
+  body { padding: 0 15px; }
+}
+
 /* About page */
 .about .footer-section { margin-top: auto; }
 .about pre { white-space: pre-wrap; overflow-wrap: break-word; width: 100%; margin: 0 0 2em 0; }
