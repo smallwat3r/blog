@@ -71,5 +71,6 @@ footer { margin-top: 0; padding-top: 0; }
 }
 
 /* About page */
+.about p { line-height: 1.2; margin: 0 0 1em 0; }
 .about .footer-section { margin-top: auto; }
 .about pre { white-space: pre-wrap; overflow-wrap: break-word; width: 100%; margin: 0 0 2em 0; }
