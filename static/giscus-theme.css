@@ -1,0 +1,47 @@
+main {
+  --color-canvas-default: #F5E4C1;
+  --color-canvas-overlay: #F5E4C1;
+  --color-canvas-inset: #eddcb3;
+  --color-canvas-subtle: #eddcb3;
+  --color-border-default: #d9cba8;
+  --color-border-muted: #d9cba8;
+  --color-border-overlay: #d9cba8;
+  --color-neutral-muted: rgba(232, 217, 181, 0.5);
+  --color-accent-fg: #0000EE;
+  --color-accent-emphasis: #0000EE;
+  --color-accent-muted: rgba(0, 0, 238, 0.2);
+  --color-accent-subtle: rgba(0, 0, 238, 0.1);
+  --color-fg-default: #222;
+  --color-fg-muted: #666;
+  --color-fg-subtle: #888;
+  --color-fg-on-emphasis: #fff;
+  --color-btn-text: #222;
+  --color-btn-bg: #eddcb3;
+  --color-btn-border: #d9cba8;
+  --color-btn-shadow: 0 0 transparent;
+  --color-btn-inactiveText: #666;
+  --color-btn-hover-bg: #e5d4ab;
+  --color-btn-hover-border: #c4b494;
+  --color-btn-active-bg: #dcc99e;
+  --color-btn-active-border: #c4b494;
+  --color-btn-selected-bg: #dcc99e;
+  --color-btn-primary-text: #fff;
+  --color-btn-primary-bg: #0000EE;
+  --color-btn-primary-border: #0000CC;
+  --color-btn-primary-shadow: 0 0 transparent;
+  --color-btn-primary-hover-bg: #0000CC;
+  --color-btn-primary-hover-border: #0000AA;
+  --color-btn-primary-selected-bg: #0000CC;
+  --color-btn-primary-disabled-text: rgba(255, 255, 255, 0.5);
+  --color-btn-primary-disabled-bg: rgba(0, 0, 238, 0.5);
+  --color-btn-primary-disabled-border: transparent;
+  --color-action-list-item-default-hover-bg:
+    rgba(232, 217, 181, 0.5);
+  --color-segmented-control-bg: #eddcb3;
+  --color-segmented-control-button-bg: #F5E4C1;
+  --color-segmented-control-button-selected-border:
+    #d9cba8;
+  --color-primer-shadow-inset: 0 0 transparent;
+  --color-scale-gray-2: #d9cba8;
+  --color-scale-blue-1: rgba(0, 0, 238, 0.15);
+}
