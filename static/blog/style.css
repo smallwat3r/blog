@@ -2,6 +2,7 @@
 
 /* Layout */
 main, article { max-width: 750px; width: 100%; }
+.giscus { padding: 1px; }
 .giscus, .giscus-frame { max-width: 100%; }
 .back-link { margin-bottom: 0.5em; }
 .sep { text-align: center; color: var(--color-text-muted); margin: 2em 0; letter-spacing: 0.3em; }
