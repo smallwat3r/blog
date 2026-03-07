@@ -71,6 +71,29 @@ footer { margin-top: 0; padding-top: 0; }
 }
 
 /* About page */
+.about-content {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.about-content img {
+  margin-bottom: 1em;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+}
+@media (min-width: 768px) {
+  .about-content {
+    flex-direction: row;
+    gap: 2em;
+  }
+  .about-content img {
+    align-self: flex-start;
+    margin-top: 2em;
+    margin-bottom: 0;
+    width: 150px;
+    height: 150px;
+  }
+}
 .about p { line-height: 1.2; margin: 0 0 1em 0; }
 .about .footer-section { margin-top: auto; }
 .about pre { white-space: pre-wrap; overflow-wrap: break-word; width: 100%; margin: 0 0 2em 0; }
