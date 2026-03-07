@@ -77,7 +77,7 @@ def create_jinja_env() -> Environment:
     env = Environment(loader=FileSystemLoader(TEMPLATES))
     env.globals["domain"] = DOMAIN
     env.globals["year"] = datetime.now().year
-    env.filters["date_display"] = lambda d: datetime.fromisoformat(d).strftime("%b %Y")
+    env.filters["date_display"] = lambda d: datetime.fromisoformat(d).strftime("%d %b %Y")
     env.filters["date_short"] = lambda d: d.split("T")[0]
     env.filters["rfc822"] = lambda d: format_datetime(
         datetime.fromisoformat(d).replace(tzinfo=timezone.utc)
