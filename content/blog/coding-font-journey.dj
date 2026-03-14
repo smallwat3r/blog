@@ -1,5 +1,5 @@
 ---
-title: Coding fonts
+title: A coding font journey
 description: A personal journey through coding fonts, from Consolas on Windows to Monaco on macOS, bitmap fonts on Linux, and putting together my own OCR-based monospace font.
 date: 2026-03-14T10:00
 tags: fonts, dotfiles
@@ -58,7 +58,7 @@ condensed, the curves are a little quirky, and it looks like it
 belongs on a screen from a different era. Not retro, exactly, but not
 modern either.
 
-![Monaco font sample](../images/coding-fonts/monaco.webp)
+![Monaco font sample](../images/coding-font-journey/monaco.webp)
 
 This was also around the time I moved from PyCharm to Vim, which
 became my editor for years. Vim in a terminal with Monaco felt like
@@ -96,7 +96,7 @@ this even further, with curves that feel more like handwriting than
 code. The lowercase `k` has a loop. The `f` has a playful descender.
 The asterisk looks like a tiny flower.
 
-![Fantasque Sans Mono font sample](../images/coding-fonts/fantasque.webp)
+![Fantasque Sans Mono font sample](../images/coding-font-journey/fantasque.webp)
 
 Fantasque scratched an itch I did not know I had: I wanted my editor
 to look *different*. Not just functional, but expressive. The font is
@@ -113,7 +113,7 @@ screens. It comes in three variants: Code (monospace), Poly
 (proportional), and Text (also proportional but optimized for body
 text). I bit the bullet and paid for the Code variant.
 
-![Triplicate Code font sample](../images/coding-fonts/triplicate.webp)
+![Triplicate Code font sample](../images/coding-font-journey/triplicate.webp)
 
 Triplicate Code is just clean. It feels different from every other
 monospace font in a way that is hard to describe. There is a classic
@@ -129,7 +129,7 @@ slightly rounded style
 that works surprisingly well for code. It is one of those fonts that
 you try on a whim and end up using for months.
 
-![Luculent font sample](../images/coding-fonts/luculent.webp)
+![Luculent font sample](../images/coding-font-journey/luculent.webp)
 
 ## IV. The bitmap era
 
@@ -158,7 +158,7 @@ heard of. Two that stood out:
 [Greybeard](https://github.com/flowchartsman/greybeard) is a bitmap
 font with a programmer's sensibility.
 
-![Greybeard font sample](../images/coding-fonts/greybeard.webp)
+![Greybeard font sample](../images/coding-font-journey/greybeard.webp)
 
 It has excellent glyph
 distinction and works well at small sizes. Finding it felt like
@@ -168,7 +168,7 @@ discovering a secret, the kind of font that does not show up in
 [sq](https://github.com/leahneukirchen/sq) is even more obscure, a
 tiny square bitmap font that is almost aggressively minimal.
 
-![sq font sample](../images/coding-fonts/sq.webp)
+![sq font sample](../images/coding-font-journey/sq.webp)
 
 It is
 the kind of font you use when you want your terminal to look like
@@ -217,7 +217,7 @@ result is [ocrab](https://github.com/smallwat3r/ocrab-font), a
 monospace font based on
 [OCR-A and OCR-B](https://tsukurimashou.org/ocr.php.en).
 
-![ocrab font sample](../images/coding-fonts/ocrab.webp)
+![ocrab font sample](../images/coding-font-journey/ocrab.webp)
 
 The original OCR-A and OCR-B were designed in the 1960s and 1970s
 for optical character recognition, literally fonts meant to be read
@@ -246,7 +246,7 @@ the right character, its letters are crisp and deliberate, but
 its symbols and punctuation are too abstract for my human eye,
 designed for scanners rather than programmers.
 
-![OCR-A, OCR-B, and ocrab comparison](../images/coding-fonts/ocr-comparison.webp)
+![OCR-A, OCR-B, and ocrab comparison](../images/coding-font-journey/ocr-comparison.webp)
 
 Mixing both turned out to be the best of both worlds. Ocrab uses
 OCR-A's letters with OCR-B's symbols and punctuation. Characters
@@ -257,7 +257,7 @@ base letters with OCR-B accent marks, built using
 font with full ASCII coverage, accented characters for languages
 like French, and a Nerd Font patch for extra glyphs.
 
-![OCR-A, OCR-B, and ocrab code comparison](../images/coding-fonts/ocrab-code.webp)
+![OCR-A, OCR-B, and ocrab code comparison](../images/coding-font-journey/ocrab-code.webp)
 
 A font that looks like it belongs on a machine-readable document
 but works perfectly in a terminal and an editor.
