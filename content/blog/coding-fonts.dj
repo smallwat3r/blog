@@ -219,13 +219,16 @@ monospace font based on
 
 ![ocrab font sample](../images/coding-fonts/ocrab.webp)
 
-OCR-A and OCR-B were designed in the 1960s and 1970s for optical
-character recognition, literally fonts meant to be read by machines.
-OCR-A is geometric and rigid, every stroke follows strict rules so
-that scanners can parse it reliably. OCR-B, designed later by Adrian
-Frutiger, softened those constraints while remaining
-machine-readable, trading some of OCR-A's robotic precision for
-better human legibility.
+The original OCR-A and OCR-B were designed in the 1960s and 1970s
+for optical character recognition, literally fonts meant to be read
+by machines. The versions used in ocrab come from Matthew Skala's
+[Tsukurimashou project](https://tsukurimashou.org/ocr.php.en),
+open source reimplementations of both standards. OCR-A is geometric
+and rigid, every stroke follows strict rules so that scanners can
+parse it reliably. OCR-B, originally designed by Adrian Frutiger,
+softened those constraints while remaining machine-readable,
+trading some of OCR-A's robotic precision for better human
+legibility.
 
 Both fonts have an unmistakable look. If you have ever seen the
 numbers on a passport or a bank check, you have seen OCR-B. They
@@ -234,25 +237,30 @@ aesthetics, there is something appealing about using a font that
 was designed with readability as an engineering constraint, not
 just a goal.
 
-The problem with using the original OCR fonts for coding is that they
-are incomplete. They were designed for a specific character set,
-digits, uppercase letters, and a handful of symbols. Missing are
-curly braces, backticks, pipes, tildes, and many other characters
-that programmers use constantly. Some of OCR-A's special characters are too purpose-built for
-machine reading, too rigid for comfortable daily use. OCR-B's
-simpler, softer forms work much better for my eye.
+The problem is that neither font works perfectly for coding on its
+own. OCR-B's letterforms felt a bit off to me for programming,
+the characters are softer and rounder, designed for human
+readability on printed documents, but they lose the sharp,
+technical feel I was after. OCR-A on the other hand has exactly
+the right character, its letters are crisp and deliberate, but
+its symbols and punctuation are too abstract for my human eye,
+designed for scanners rather than programmers.
 
 ![OCR-A, OCR-B, and ocrab comparison](../images/coding-fonts/ocr-comparison.webp)
 
-Ocrab fills those gaps. Characters that OCR-A lacks, like some
-punctuation and symbols, are taken directly from OCR-B. For
-accented characters like é, è, ç, or ñ, the approach is to combine
-OCR-A base letters with OCR-B accent marks, built using
+Mixing both turned out to be the best of both worlds. Ocrab uses
+OCR-A's letters with OCR-B's symbols and punctuation. Characters
+that OCR-A lacks are taken directly from OCR-B. For accented
+characters like é, è, ç, or ñ, the approach is to combine OCR-A
+base letters with OCR-B accent marks, built using
 [FontForge](https://fontforge.org/). The result is a proper coding
 font with full ASCII coverage, accented characters for languages
-like French, and a Nerd Font patch for extra glyphs. A font that
-looks like it belongs on a machine-readable document but works
-perfectly in a terminal and an editor.
+like French, and a Nerd Font patch for extra glyphs.
+
+![OCR-A, OCR-B, and ocrab code comparison](../images/coding-fonts/ocrab-code.webp)
+
+A font that looks like it belongs on a machine-readable document
+but works perfectly in a terminal and an editor.
 
 What I like most about it is that it feels like a bitmap font without
 the downsides. The OCR heritage gives every glyph that crisp,
