@@ -296,6 +296,46 @@ is one of the few aesthetic choices you get to make in an environment
 that is otherwise pure function. A good font makes the screen feel
 like yours.
 
+The font samples in this post were generated with a small Python
+script using [Pillow](https://pillow.readthedocs.io/). For bitmap fonts
+like Greybeard and sq, Pillow can load BDF and PCF files natively
+and render them at their true pixel size. For outline fonts, it
+uses FreeType under the hood. The images are then converted to
+WebP with [cwebp](https://developers.google.com/speed/webp/docs/cwebp).
+
+```python
+from PIL import Image, ImageDraw, ImageFont
+
+SAMPLE = """\
+The quick brown fox jumps
+over the lazy dog.
+
+a b c d e f g h i j k l m
+n o p q r s t u v w x y z
+0O 1lI {[()]} @#&
+.,;:!? <> += -_ * ~
+
+def greet(name):
+    print("Hello, " + name)"""
+
+
+def render(font_path, output, size=24):
+    font = ImageFont.truetype(font_path, size)
+    tmp = Image.new("RGB", (1, 1))
+    draw = ImageDraw.Draw(tmp)
+    bbox = draw.textbbox((0, 0), SAMPLE, font=font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    pad = 40
+    img = Image.new("RGB", (800, th + pad * 2), "#fff")
+    draw = ImageDraw.Draw(img)
+    draw.text((pad, pad), SAMPLE, fill="#1a1a1a", font=font)
+    img.save(output)
+
+
+render("ocrab.otf", "ocrab.png")
+render("MonacoB.otf", "monaco.png")
+```
+
 ## Links
 
 - [ocrab](https://github.com/smallwat3r/ocrab-font), OCR-based

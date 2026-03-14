@@ -60,7 +60,7 @@ kbd { background-color: var(--color-border); border: 1px solid var(--color-scrol
 .pre-wrapper:hover .copy-btn { opacity: 1; }
 
 /* Syntax highlighting */
-code span.kw, code span.cf { color: #800080; }
+code span.kw, code span.cf, code span.im { color: #800080; }
 code span.dv, code span.bn, code span.fl { color: #008B8B; }
 code span.ch, code span.st, code span.vs, code span.ss { color: #00868B; }
 code span.co, code span.an, code span.cv { color: #8B8B00; font-style: italic; }
