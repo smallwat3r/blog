@@ -1,3 +1,13 @@
+/* Fonts */
+@font-face {
+  font-family: "Ocrab Nerd Font Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/ocrab-nerd-font.woff2")
+    format("woff2");
+}
+
 /* Variables */
 :root {
   --color-text-muted: #666;
@@ -25,8 +35,8 @@ h1 { margin-top: 0; }
 a { text-decoration: none; font-style: italic; }
 a:hover { text-decoration: underline; }
 pre, code, kbd {
-  font-family: ui-monospace, "Cascadia Mono", "SF Mono",
-    Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: "Ocrab Nerd Font Mono", monospace;
+  font-size: 0.9em;
 }
 strong, b { font-weight: 500; }
 
@@ -52,7 +62,6 @@ footer { margin-top: auto; padding-top: 1em; padding-bottom: 2em; color: var(--c
 /* Responsive */
 @media (min-width: 768px) {
   body { font-size: 17px; padding: 15px 0 0 40px; }
-  pre, code, kbd { font-size: 17px; }
 }
 @media (min-width: 1200px) {
   body { padding: 15px; }
