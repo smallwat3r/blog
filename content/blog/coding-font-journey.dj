@@ -52,8 +52,7 @@ first impression.
 When I moved to macOS, the terminal greeted me with
 [Monaco](https://en.wikipedia.org/wiki/Monaco_%28typeface%29),
 designed in 1984 by Susan Kare and Kris Holmes for the original
-Macintosh. It
-it has a character that is hard to pin down. The letters are slightly
+Macintosh. It has a character that is hard to pin down. The letters are slightly
 condensed, the curves are a little quirky, and it looks like it
 belongs on a screen from a different era. Not retro, exactly, but not
 modern either.
@@ -65,7 +64,7 @@ became my editor for years. Vim in a terminal with Monaco felt like
 the right combination. Minimal interface, sharp text, no distractions.
 
 Apple eventually replaced Monaco with
-[Menlo](https://en.wikipedia.org/wiki/Menlo_(typeface)) as the system
+[Menlo](https://en.wikipedia.org/wiki/Menlo_%28typeface%29) as the system
 monospace, which itself is a customized
 [DejaVu Sans Mono](https://dejavu-fonts.github.io/). Then came
 [SF Mono](https://developer.apple.com/fonts/), Apple's own take on
@@ -78,8 +77,9 @@ grown attached to it, and everything else felt slightly off.
 
 There was something about those slightly narrow letterforms, the way
 it renders at small sizes, the personality baked into every glyph. It
-felt like *my* font, not just a system default. Menlo and SF Mono feel engineered for maximum neutrality, while
-Monaco feels like it has a point of view.
+felt like *my* font, not just a system default. Menlo and SF Mono
+feel engineered for maximum neutrality, while Monaco feels like it
+has a point of view.
 
 Even after switching to Linux as my daily setup, I brought it
 with me. The licensing around using Monaco outside macOS is
@@ -184,8 +184,10 @@ and incomplete character sets. You are always making trade-offs.
 ## V. No ligatures, no gimmicks
 
 Throughout all of this, one thing has stayed constant: I have never
-been drawn to font features that try to be clever. Ligatures feel like they are solving a problem I do not have. Code is text. I want to see the characters
-I typed, not a typographic interpretation of what they mean.
+been drawn to font features that try to be clever. Ligatures feel
+like they are solving a problem I do not have. Code is text. I want
+to see the characters I typed, not a typographic interpretation of
+what they mean.
 
 The same goes for fonts that try to pack in every feature: built-in
 icons, Nerd Font patches, stylistic alternates, swashes. I respect
@@ -232,8 +234,8 @@ legibility.
 
 Both fonts have an unmistakable look. If you have ever seen the
 numbers on a passport or a bank check, you have seen OCR-B. They
-feel technical, industrial, purpose-built. Exactly the kind of personality I had been chasing. But beyond
-aesthetics, there is something appealing about using a font that
+feel technical, industrial, purpose-built. Exactly the kind of personality I had been chasing.
+But beyond aesthetics, there is something appealing about using a font that
 was designed with readability as an engineering constraint, not
 just a goal.
 
