@@ -321,20 +321,27 @@ def greet(name):
     print("Hello, " + name)"""
 
 
+LABEL_FONT = ImageFont.truetype("ocrab.otf", 14)
+
+
 def render(font_path, label, output, size=24):
     font = ImageFont.truetype(font_path, size)
-    label_font = ImageFont.truetype(font_path, 14)
     tmp = Image.new("RGB", (1, 1))
     draw = ImageDraw.Draw(tmp)
     bbox = draw.textbbox((0, 0), SAMPLE, font=font)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    pad = 40
-    label_h = 20
+    th = bbox[3] - bbox[1]
+    pad, label_h = 40, 20
     h = label_h + th + pad * 2
     img = Image.new("RGB", (800, h), "#fff")
     draw = ImageDraw.Draw(img)
-    draw.text((pad, pad - 5), label, fill="#888", font=label_font)
-    draw.text((pad, pad + label_h), SAMPLE, fill="#1a1a1a", font=font)
+    draw.text(
+        (pad, pad - 5), label,
+        fill="#888", font=LABEL_FONT,
+    )
+    draw.text(
+        (pad, pad + label_h), SAMPLE,
+        fill="#1a1a1a", font=font,
+    )
     img.save(output)
 
 
