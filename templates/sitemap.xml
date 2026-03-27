@@ -8,6 +8,10 @@
     <loc>{{ domain }}/{{ about.path | replace('.html', '') }}</loc>
     <lastmod>{{ about.lastmod | date_short }}</lastmod>
   </url>
+  <url>
+    <loc>{{ domain }}/{{ projects.path | replace('.html', '') }}</loc>
+    <lastmod>{{ projects.lastmod | date_short }}</lastmod>
+  </url>
 {% for post in posts %}
   <url>
     <loc>{{ domain }}/{{ post.path | replace('.html', '') }}</loc>

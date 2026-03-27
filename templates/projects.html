@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block description %}{{page.description}}{% endblock %}
+{% block canonical %}https://smallwat3r.com/{{page.slug}}{% endblock %}
+{% block title %}{{page.title}} - smallwat3r{% endblock %}
+
+{% block meta %}
+    <meta property="og:site_name" content="smallwat3r">
+    <meta property="og:title" content="{{page.title}} - smallwat3r">
+    <meta property="og:description" content="{{page.description}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url"
+      content="https://smallwat3r.com/{{page.slug}}">
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="index.css">
+{% endblock %}
+
+{% block body_class %} class="projects"{% endblock %}
+
+{% block body %}
+    <div class="container">
+    <div class="back-link">
+      <a class="back" href="index.html">&#8592; back</a>
+    </div>
+
+    <h1>Projects</h1>
+    <div class="projects-intro">{{page.body}}</div>
+
+    <input type="text" class="project-search"
+      placeholder="Search projects..." autofocus>
+
+    <ul class="project-list">
+{% for repo in repos %}
+      <li class="project-item"
+        data-search="{{repo.name}} {{repo.description}}">
+        <div class="project-header">
+          <a href="{{repo.url}}" class="project-name">
+            {{- repo.name -}}
+          </a>
+{% if repo.language %}
+          <span class="project-lang">{{repo.language}}</span>
+{% endif %}
+        </div>
+{% if repo.description %}
+        <p class="project-desc">{{repo.description}}</p>
+{% endif %}
+        <div class="project-stats">
+{% if repo.stars > 0 %}
+          <span class="project-stat"
+            title="Stars">&#9733; {{repo.stars}}</span>
+{% endif %}
+{% if repo.forks > 0 %}
+          <span class="project-stat"
+            title="Forks">&#9741; {{repo.forks}}</span>
+{% endif %}
+{% if repo.pushed_at %}
+          <span class="project-stat"
+            title="Last push">{{repo.pushed_at}}</span>
+{% endif %}
+        </div>
+      </li>
+{% endfor %}
+    </ul>
+
+    {% include "partials/footer.html" %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="projects.js"></script>
+{% endblock %}
