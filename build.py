@@ -159,6 +159,7 @@ def build() -> None:
 
     print("Fetching GitHub repos...")
     repos = fetch_github_repos("smallwat3r")
+    fetched_at = datetime.now(timezone.utc).strftime("%d %b %Y at %H:%M UTC")
 
     print("Building:")
     for post in posts:
@@ -173,7 +174,7 @@ def build() -> None:
     write(
         "projects.html",
         env.get_template("projects.html").render(
-            page=projects, repos=repos,
+            page=projects, repos=repos, fetched_at=fetched_at,
         ),
     )
     write(
