@@ -5,7 +5,7 @@ BUILD := .build
 BLOG_DJ := $(wildcard content/blog/*.dj)
 BLOG_HTML := $(patsubst content/%.dj,$(BUILD)/%.html,$(BLOG_DJ))
 
-ALL_HTML := $(BLOG_HTML) $(BUILD)/about.html $(BUILD)/projects.html $(BUILD)/index.html
+ALL_HTML := $(BLOG_HTML) $(BUILD)/about.html $(BUILD)/index.html
 
 PANDOC := pandoc -f djot -t html
 BLOG_OPTS := --toc -s --template=pandoc/template.html --lua-filter=pandoc/blog.lua

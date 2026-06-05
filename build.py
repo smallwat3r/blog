@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """Build script for smallwat3r.com"""
 
-import json
 import re
 import shutil
-import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.utils import format_datetime
@@ -74,51 +72,6 @@ def collect_content(path: Path, prefix: str = "") -> Content:
     )
 
 
-@dataclass
-class Repo:
-    name: str
-    description: str
-    url: str
-    stars: int
-    forks: int
-    language: str
-    pushed_at: str
-
-
-def fetch_github_repos(user: str) -> list[Repo]:
-    """Fetch public repos from GitHub, sorted by stars."""
-    repos: list[Repo] = []
-    page = 1
-    while True:
-        url = f"https://api.github.com/users/{user}/repos?per_page=100&page={page}"
-        req = urllib.request.Request(
-            url,
-            headers={"Accept": "application/json"},
-        )
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read())
-        if not data:
-            break
-        for r in data:
-            if r["fork"] or r["archived"]:
-                continue
-            pushed = r["pushed_at"] or ""
-            if pushed:
-                pushed = pushed.split("T")[0]
-            repos.append(Repo(
-                name=r["name"],
-                description=r["description"] or "",
-                url=r["html_url"],
-                stars=r["stargazers_count"],
-                forks=r["forks_count"],
-                language=r["language"] or "",
-                pushed_at=pushed,
-            ))
-        page += 1
-    repos.sort(key=lambda r: r.stars, reverse=True)
-    return repos
-
-
 def create_jinja_env() -> Environment:
     """Create Jinja2 environment with filters and globals."""
     env = Environment(loader=FileSystemLoader(TEMPLATES))
@@ -154,12 +107,7 @@ def build() -> None:
     )
     all_tags = sorted({t for p in posts for t in p.tags})
     about = collect_content(CONTENT / "about.dj")
-    projects = collect_content(CONTENT / "projects.dj")
     index = collect_content(CONTENT / "index.dj")
-
-    print("Fetching GitHub repos...")
-    repos = fetch_github_repos("smallwat3r")
-    fetched_at = datetime.now(timezone.utc).strftime("%d %b %Y at %H:%M UTC")
 
     print("Building:")
     for post in posts:
@@ -172,12 +120,6 @@ def build() -> None:
         env.get_template("about.html").render(page=about),
     )
     write(
-        "projects.html",
-        env.get_template("projects.html").render(
-            page=projects, repos=repos, fetched_at=fetched_at,
-        ),
-    )
-    write(
         "index.html",
         env.get_template("index.html").render(
             index=index, posts=posts, tags=all_tags,
@@ -186,8 +128,7 @@ def build() -> None:
     write(
         "sitemap.xml",
         env.get_template("sitemap.xml").render(
-            posts=posts, about=about,
-            projects=projects, index=index,
+            posts=posts, about=about, index=index,
         ),
     )
     write("feed.xml", env.get_template("feed.xml").render(posts=posts, index=index))
