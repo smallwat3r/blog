@@ -125,8 +125,9 @@ The container itself is stripped down:
 ```bash
 --cap-drop=ALL                    # no Linux capabilities
 --security-opt=no-new-privileges  # no setuid escalation
---read-only                       # immutable fs (tmpfs for /tmp, caches)
+--read-only                       # immutable fs (sized tmpfs for /tmp, caches)
 --pids-limit=512                  # no fork bombs
+--memory=4g                       # no eating the host's RAM
 --user "$(id -u):$(id -g)"        # runs as you, not root
 ```
 
@@ -142,9 +143,10 @@ script bind-mounts `/dev/null` over every `.env` file it finds:
 ```
 
 The file exists in the project, but inside the container it reads as
-empty. Claude can never leak what it cannot see. This is a structural
-guarantee, not a policy: there is no instruction to follow or ignore,
-the bytes are simply not there.
+empty. Template files, `.env.example` and friends, are left readable:
+they exist to be read and hold no secrets. Claude can never leak what
+it cannot see. This is a structural guarantee, not a policy: there is
+no instruction to follow or ignore, the bytes are simply not there.
 
 ### b) Network egress filtering
 
@@ -179,6 +181,15 @@ http_access allow allowed
 http_access deny all
 ```
 
+DNS gets closed off too. Even with every connection blocked, merely
+resolving a name leaks data: encode a secret into a hostname, look up
+`3xAB12EF.attacker.com`, and the query itself carries the secret to
+the attacker's DNS server. The container does not actually need DNS,
+though: it hands hostnames to squid as plain text in the CONNECT
+request, and squid does the resolving. So filter mode points the
+container's DNS at a blackhole (`--dns 127.0.0.1`), and external
+lookups simply die.
+
 Here it is in action, asking Claude to check a domain that is not on the
 allowlist: squid returns 403 for it, while github.com goes through.
 
@@ -210,8 +221,8 @@ its project:
 ```console
 $ docker ps
 CONTAINER ID   IMAGE                           STATUS         NAMES
-a1b2c3d4e5f6   claude-sandbox                  Up 2 hours     claude-myproject
-f6e5d4c3b2a1   claude-sandbox                  Up 20 minutes  claude-otherproject
+a1b2c3d4e5f6   claude-code-sandbox             Up 2 hours     claude-myproject
+f6e5d4c3b2a1   claude-code-sandbox             Up 20 minutes  claude-otherproject
 0b1c2d3e4f5a   tecnativa/docker-socket-proxy   Up 2 hours     claude-docker-proxy
 7c8d9e0f1a2b   ubuntu/squid                    Up 20 minutes  claude-egress-proxy
 9f8e7d6c5b4a   postgres:16                     Up 3 days      myapp-db
@@ -239,7 +250,7 @@ restart it, or start anything new, the proxy refuses every mutating verb.
 
 The [Dockerfile [(e9022f4)]{.commit}](https://github.com/smallwat3r/emacs/blob/e9022f4/docker/claude-sandbox/Dockerfile)
 is where the sandbox becomes yours. Base image `node:22-slim`, then
-every tool I want Claude to have, pinned and pre-installed:
+every tool I want Claude to have, chosen once and baked in:
 
 - `git`, `gh`, `openssh-client`, version control and GitHub CLI
 - `ripgrep`, `fd-find`, `jq`, `tree`, the search tools Claude reaches for
@@ -248,6 +259,7 @@ every tool I want Claude to have, pinned and pre-installed:
 - Go, latest official tarball, apt's version is outdated
 - `docker-ce-cli`, talks to the host via the socket proxy
 - `ffmpeg`, `imagemagick`, `webp`, media processing
+- `pandoc`, document conversion
 - `gnuplot`, `openscad`, `admesh`, plotting and 3D printing / CAD
 
 The bottom half of that list is specific to my work, not a generic dev
@@ -258,9 +270,9 @@ apt-installs anything onto my host, and a `pip install` it runs on a whim
 dies with the container. The image is the only place software
 accumulates, so the toolchain stays deliberate.
 
-Claude Code itself is baked into the image the same way, installed at
-build time with its auto-updater disabled. Updating Claude = rebuilding
-the image:
+Claude Code itself is baked into the image the same way, pinned to an
+exact version with its auto-updater disabled. Updating Claude =
+bumping the version and rebuilding:
 
 ```console
 docker build --no-cache --build-arg HOST_HOME="$HOME" \
@@ -270,6 +282,12 @@ docker build --no-cache --build-arg HOST_HOME="$HOME" \
 (Also available as
 [`sw-claude-rebuild-sandbox`](https://github.com/smallwat3r/emacs/blob/e9022f4/lisp/sw-claude.el#L29)
 from Emacs.)
+
+The build pins what it can: the base image by digest, `uv`, Go and
+Claude Code by version, with the Go tarball checksum-verified. A
+rebuild cannot silently pull in something new, updating is a
+deliberate version bump. (The apt packages stay unpinned, Debian's
+repos drop old versions, pinning those just breaks future builds.)
 
 ### a) The home directory symlink
 
@@ -407,6 +425,14 @@ Worth spelling out:
 - The egress allowlist bounds exfiltration, it does not prevent it.
   GitHub, npm and PyPI are all viable exfiltration channels for
   anything the session can read.
+- Without the egress filter, the container sits on an ordinary
+  bridge network, so the host's own services and the rest of the LAN
+  are reachable.
+- The Docker socket proxy is read-only, but read-only visibility is
+  still visibility: `docker inspect` returns the full environment of
+  every container on the host, secrets included. On a dev machine
+  those are usually throwaway values, but so are the `.env` files
+  this setup bothers to shadow, treat them with the same suspicion.
 - `~/.claude` is mounted read-write and shared across sessions, so a
   compromised session could read another project's transcripts, or
   plant hooks and instructions that run in future containers. The seam
