@@ -461,6 +461,6 @@ more to me than being on the standard path.
 - [claude-code.el](https://github.com/stevemolitor/claude-code.el), the
   Emacs package the integration builds on
 - [docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy),
-  the read-only Docker API proxy
+  the Docker API filtering proxy, configured read-only here
 - [Claude Code sandboxing docs](https://code.claude.com/docs/en/sandboxing),
   the native alternatives
