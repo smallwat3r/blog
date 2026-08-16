@@ -14,7 +14,7 @@ a tool arbitrary execution on your laptop.
 
 Instead of running it directly on my machine, I run Claude Code inside
 a locked-down Docker container, driven by a bash script,
-[claude-docker [(0fe1fa8)]{.commit}](https://github.com/smallwat3r/emacs/blob/0fe1fa8/bin/claude-docker):
+[claude-docker [(27a2324)]{.commit}](https://github.com/smallwat3r/emacs/blob/27a2324/bin/claude-docker):
 
 ```console
 cd my-project
@@ -249,7 +249,7 @@ restart it, or start anything new, the proxy refuses every mutating verb.
 
 ## V. The image: a personal toolchain
 
-The [Dockerfile [(0fe1fa8)]{.commit}](https://github.com/smallwat3r/emacs/blob/0fe1fa8/docker/claude-sandbox/Dockerfile)
+The [Dockerfile [(27a2324)]{.commit}](https://github.com/smallwat3r/emacs/blob/27a2324/docker/claude-sandbox/Dockerfile)
 is where the sandbox becomes yours. Base image `node:22-slim`, then
 every tool I want Claude to have, chosen once and baked in:
 
@@ -281,7 +281,7 @@ docker build --no-cache --build-arg HOST_HOME="$HOME" \
 ```
 
 (Also available as
-[`sw-claude-rebuild-sandbox`](https://github.com/smallwat3r/emacs/blob/0fe1fa8/lisp/sw-claude.el#L29)
+[`sw-claude-rebuild-sandbox`](https://github.com/smallwat3r/emacs/blob/27a2324/lisp/sw-claude.el#L29)
 from Emacs.)
 
 The build pins what it can: the base image by digest, `uv`, Go and
@@ -481,9 +481,9 @@ more to me than being on the standard path.
 
 ## Links
 
-- [claude-docker [(0fe1fa8)]{.commit}](https://github.com/smallwat3r/emacs/blob/0fe1fa8/bin/claude-docker),
+- [claude-docker [(27a2324)]{.commit}](https://github.com/smallwat3r/emacs/blob/27a2324/bin/claude-docker),
   the wrapper script
-- [The sandbox Dockerfile](https://github.com/smallwat3r/emacs/tree/0fe1fa8/docker/claude-sandbox),
+- [The sandbox Dockerfile](https://github.com/smallwat3r/emacs/tree/27a2324/docker/claude-sandbox),
   image, squid config and domain allowlist
 - [claude-code.el](https://github.com/stevemolitor/claude-code.el), the
   Emacs package the integration builds on
