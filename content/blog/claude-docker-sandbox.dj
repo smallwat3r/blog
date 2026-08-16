@@ -128,6 +128,7 @@ The container itself is stripped down:
 --read-only                       # immutable fs (sized tmpfs for /tmp, caches)
 --pids-limit=512                  # no fork bombs
 --memory=4g                       # no eating the host's RAM
+--init                            # reap zombies (claude runs as PID 1)
 --user "$(id -u):$(id -g)"        # runs as you, not root
 ```
 
