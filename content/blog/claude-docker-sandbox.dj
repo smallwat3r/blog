@@ -39,7 +39,7 @@ The sandbox flips the trade-off between power and trust:
 - Reproducible toolchain, every session gets the same git, go, python and
   node versions
 
-That second-to-last point is the real motivation. Claude Code's permission
+The `--dangerously-skip-permissions` point is the real motivation. Claude Code's permission
 prompts exist because it runs on your real machine. Move the boundary from
 the application to the OS, and the prompts stop being necessary. Claude
 can run free inside the container because the container cannot reach
@@ -102,11 +102,15 @@ distinct containers. Killing a session removes the container
 ### b) Persisting config in a read-only home
 
 One gotcha worth sharing if you build something similar. Claude Code
-writes its global config atomically, temp file then rename. The obvious
-approach, bind-mounting `~/.claude.json` as a single file, breaks
-silently: you cannot rename over a bind-mounted file, and the container
-home is read-only, so every config write is lost and Claude re-prompts
-for theme and folder trust on each launch.
+never updates its global config in place: it writes a sibling temp file
+(`~/.claude.json.tmp.<pid>`, newer versions add a random hex suffix),
+then renames it over the original. Bind-mounting that
+file into the container, the obvious approach, defeats both steps. The
+read-only home blocks the temp file, and even with a writable home, the
+rename would fail, since a bind-mounted file is a mount point and
+`rename()` cannot replace a mount point. Claude swallows the error, so
+nothing visibly fails, the writes just vanish, and every launch
+re-prompts for theme and folder trust.
 
 The fix is to point `CLAUDE_CONFIG_DIR` at the mounted `~/.claude`
 directory instead. There the config is a regular file inside a writable
@@ -246,7 +250,7 @@ every tool I want Claude to have, pinned and pre-installed:
 - `ffmpeg`, `imagemagick`, `webp`, media processing
 - `gnuplot`, `openscad`, `admesh`, plotting and 3D printing / CAD
 
-The bottom half of that list is proper to my work, not a generic dev
+The bottom half of that list is specific to my work, not a generic dev
 image. Your list would be different, and that is the point.
 
 Adding a tool is one line in the Dockerfile plus a rebuild. Claude never
@@ -285,10 +289,10 @@ RUN if [ "$HOST_HOME" != /home/node ]; then \
 ```
 
 The `LABEL` stamps which home the image was built for. On launch, the
-script compares it against `$HOME` and rebuilds when they differ, which
-catches the failure mode where a cached image built on another machine
-(or for the default home) lacks the symlink, and config and credentials
-silently stop persisting.
+script compares it against `$HOME` and rebuilds when they differ. That
+catches a cached image built on another machine (or for the default
+home): it lacks the symlink, and config and credentials silently stop
+persisting.
 
 ## VI. Why not the native sandbox
 
@@ -298,8 +302,7 @@ isolation:
 - Built-in bash sandbox,
   [bubblewrap](https://github.com/containers/bubblewrap) (Linux) /
   [Seatbelt](https://developer.apple.com/documentation/security/app-sandbox)
-  (macOS), bash only. Ships with Claude Code (on Linux you install
-  bubblewrap yourself), enabled per project with `/sandbox`
+  (macOS), enabled per project with `/sandbox`. Covers bash only
 - [Sandbox runtime](https://github.com/anthropic-experimental/sandbox-runtime),
   `npx @anthropic-ai/sandbox-runtime claude`, which wraps the whole
   Claude Code process, not just bash
@@ -308,7 +311,7 @@ isolation:
 - [Claude on the web](https://code.claude.com/docs/en/claude-code-on-the-web),
   `claude --cloud`, Anthropic-managed VMs
 
-So why keep a custom setup? The models differ:
+So why keep a custom setup? The security models differ.
 
 The native sandbox runs on your real filesystem and _subtracts_ access,
 deny lists you must configure and maintain. `~/.ssh` and `.env` are
@@ -324,8 +327,8 @@ What the custom setup still wins on:
 - Docker access mediated by a read-only socket proxy, not the raw
   daemon
 - A real boundary for `--dangerously-skip-permissions`: the built-in
-  bash sandbox only covers bash, file tools, MCP servers and hooks
-  still run on the host
+  bash sandbox only covers bash, while file tools, MCP servers and
+  hooks still run on the host
 
 What the native options win on:
 
@@ -333,21 +336,17 @@ What the native options win on:
 - Deny-by-default networking, with a one-keypress prompt to allow a new
   domain. Here egress is open unless you opt in, and an unlisted domain
   just fails until you edit `allowed-domains.txt` and relaunch
-- Credential masking, for secrets Claude must actually use. Need it to
-  call a third-party API? The native runtime gives the model a fake
-  placeholder value, and its proxy swaps in the real key as the request
-  leaves. The model can print or leak only the placeholder. Here you
-  would have to hand over the real key. This could become a blocker,
-  but for now I do not trust Claude to call real third-party APIs on
-  its own anyway
+- Credential masking. The native runtime hands the model a placeholder
+  and its proxy swaps in the real key as the request leaves, so only
+  the placeholder can leak. Here you would hand over the real key. Not
+  a blocker yet, I do not let Claude call third-party APIs on its own
+  anyway
 
 ### a) The devcontainer comparison
 
 The official devcontainer deserves its own comparison, it is the closest
 cousin: same idea, the container is the boundary and only the project is
-mounted, but different calls on nearly everything else.
-
-They differ on almost every axis:
+mounted. But they differ on almost every axis:
 
 - _Capabilities_: the devcontainer runs with
   `--cap-add=NET_ADMIN,NET_RAW` because its firewall is iptables inside
@@ -379,6 +378,10 @@ is a thin layer of glue. [claude-code.el](https://github.com/stevemolitor/claude
 simply points at the wrapper script instead of the `claude` binary:
 
 ```lisp
+(defconst sw-claude-docker-script
+  (expand-file-name "bin/claude-docker" user-emacs-directory)
+  "Path to the Docker wrapper script for sandboxed Claude.")
+
 (use-package claude-code
   :when (and (executable-find "docker")
              (file-executable-p sw-claude-docker-script))
@@ -398,7 +401,7 @@ the sandbox knows or cares that Emacs is on the other end.
 No sandbox makes `--dangerously-skip-permissions` safe against a
 malicious project. Anything readable inside the container can be
 exfiltrated by a prompt-injected session, and that includes the Claude
-Code credentials, the OAuth token lives in the mounted `~/.claude`.
+Code credentials: the OAuth token lives in the mounted `~/.claude`.
 Worth spelling out:
 
 - The egress allowlist bounds exfiltration, it does not prevent it.
@@ -421,11 +424,12 @@ POSTs to external services, and I always commit manually. The session
 produces the diff, I review it and commit it myself. It costs a manual
 step per change, but it means nothing leaves my machine without my eyes
 on it first, and it keeps write credentials out of the container
-entirely. A side effect is that the sandbox rarely needs
-API keys or tokens at all: an agent that never writes outward has
-little use for credentials, and when it needs to read something from a
-third party, a read-only token is enough, or I just fetch the data
-myself and feed it in.
+entirely.
+
+A side effect is that the sandbox rarely needs API keys or tokens at
+all: an agent that never writes outward has little use for credentials.
+When it needs to read something from a third party, a read-only token
+is enough, or I just fetch the data myself and feed it in.
 
 ::: sep
 \~\~\~
