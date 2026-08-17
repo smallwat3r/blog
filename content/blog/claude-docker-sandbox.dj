@@ -468,9 +468,11 @@ The takeaways, if you want to build something similar:
 
 - Enforce permissions with walls, not prompts. Decide once what the
   container can see and reach, then let Claude run free inside it.
-- It does not take much, ~150 lines of bash, no framework, portable to
+- It does not take much, ~300 lines of bash, no framework, portable to
   any editor.
-- Secrets you shadow cannot leak. Guarantees beat trust.
+- Prefer absence over policy. A secret that is not in the container
+  cannot leak, an instruction not to read it can be ignored. Guarantees
+  beat trust.
 
 The native sandboxing options are improving fast, and for most people
 they are the right default. But this setup is mine in the same way my
