@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block description %}{{post.description}}{% endblock %}
-{% block canonical %}https://smallwat3r.com/blog/{{post.slug}}{% endblock %}
+{% block canonical %}{{post.url}}{% endblock %}
 {% block title %}{{post.title}} - smallwat3r{% endblock %}
 
 {% block meta %}
@@ -9,7 +9,7 @@
     <meta property="og:title" content="{{post.title}}">
     <meta property="og:description" content="{{post.description}}">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="https://smallwat3r.com/blog/{{post.slug}}">
+    <meta property="og:url" content="{{post.url}}">
     <meta property="article:published_time" content="{{post.date}}">
     <meta property="article:author" content="Matt Petiteau">
     <meta name="twitter:card" content="summary">
@@ -22,26 +22,26 @@
     {
       "@context": "https://schema.org",
       "@type": "Article",
-      "headline": "{{post.title}}",
-      "description": "{{post.description}}",
+      "headline": {{post.title | tojson}},
+      "description": {{post.description | tojson}},
       "author": {"@type": "Person", "name": "Matt Petiteau"},
-      "datePublished": "{{post.date}}",
-      "dateModified": "{{post.lastmod}}",
-      "url": "https://smallwat3r.com/blog/{{post.slug}}"
+      "datePublished": {{post.date | tojson}},
+      "dateModified": {{post.lastmod | tojson}},
+      "url": {{post.url | tojson}}
     }
     </script>
 {% endblock %}
 
 {% block body %}
     <div class="container">
-    <div class="back-link"><a class="back" href="../index.html">← back</a></div>
+    <div class="back-link"><a class="back" href="/">← back</a></div>
     <article>
       <h1>{{post.title}}</h1>
       <div class="date">{{post.date | date_display}} - {{post.read_time}} min read</div>
 
-{{post.body}}
+{{post.body | safe}}
 
-      <p><a class="back" href="../index.html">← back</a></p>
+      <p><a class="back" href="/">← back</a></p>
 
     </article>
     <div class="giscus"></div>

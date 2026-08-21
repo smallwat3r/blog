@@ -5,12 +5,12 @@
     <lastmod>{{ index.lastmod | date_short }}</lastmod>
   </url>
   <url>
-    <loc>{{ domain }}/{{ about.path | replace('.html', '') }}</loc>
+    <loc>{{ about.url }}</loc>
     <lastmod>{{ about.lastmod | date_short }}</lastmod>
   </url>
 {% for post in posts %}
   <url>
-    <loc>{{ domain }}/{{ post.path | replace('.html', '') }}</loc>
+    <loc>{{ post.url }}</loc>
     <lastmod>{{ post.lastmod | date_short }}</lastmod>
   </url>
 {% endfor %}

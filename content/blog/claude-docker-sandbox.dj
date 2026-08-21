@@ -464,7 +464,8 @@ is enough, or I just fetch the data myself and feed it in.
 
 ## Wrapping up
 
-The takeaways, if you want to build something similar:
+If you are thinking about using a similar setup, here is what I learnt
+building this one:
 
 - Enforce permissions with walls, not prompts. Decide once what the
   container can see and reach, then let Claude run free inside it.

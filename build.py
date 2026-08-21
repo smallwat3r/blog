@@ -23,7 +23,7 @@ DIST = Path("dist")
 @dataclass
 class Content:
     slug: str
-    path: str
+    url: str
     title: str
     description: str
     date: str
@@ -53,19 +53,21 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
 def collect_content(path: Path, prefix: str = "") -> Content:
     """Collect metadata and body from a content file."""
     meta = parse_frontmatter(path)
-    for field in ("title", "description", "date"):
+    required = ("title", "description", "date") if prefix else ("title", "description")
+    for field in required:
         if field not in meta:
             raise SystemExit(f"Error: {path} missing required field: {field}")
     slug = path.stem
     body = (BUILD / prefix / f"{slug}.html").read_text()
     tags = tuple(t.strip() for t in meta.get("tags", "").split(",") if t.strip())
+    date = meta.get("date", "")
     return Content(
         slug=slug,
-        path=f"{prefix}{slug}.html",
+        url=f"{DOMAIN}/{prefix}{slug}",
         title=meta["title"],
         description=meta["description"],
-        date=meta["date"],
-        lastmod=meta.get("lastmod", meta["date"]),
+        date=date,
+        lastmod=meta.get("lastmod", date),
         body=body,
         read_time=calc_read_time(body),
         tags=tags,
@@ -74,7 +76,7 @@ def collect_content(path: Path, prefix: str = "") -> Content:
 
 def create_jinja_env() -> Environment:
     """Create Jinja2 environment with filters and globals."""
-    env = Environment(loader=FileSystemLoader(TEMPLATES))
+    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=True)
     env.globals["domain"] = DOMAIN
     env.globals["year"] = datetime.now().year
     env.filters["date_display"] = lambda d: datetime.fromisoformat(d).strftime("%d %b %Y")

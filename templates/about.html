@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block description %}{{page.description}}{% endblock %}
-{% block canonical %}https://smallwat3r.com/{{page.slug}}{% endblock %}
+{% block canonical %}{{page.url}}{% endblock %}
 {% block title %}{{page.title}} - smallwat3r{% endblock %}
 
 {% block meta %}
@@ -9,7 +9,7 @@
     <meta property="og:title" content="{{page.title}} - smallwat3r">
     <meta property="og:description" content="{{page.description}}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://smallwat3r.com/{{page.slug}}">
+    <meta property="og:url" content="{{page.url}}">
 {% endblock %}
 
 {% block structured_data %}
@@ -36,11 +36,11 @@
 
 {% block body %}
     <div class="container">
-    <div class="back-link"><a class="back" href="index.html">← back</a></div>
+    <div class="back-link"><a class="back" href="/">← back</a></div>
 
     <div class="about-content">
     <div>
-{{page.body}}
+{{page.body | safe}}
     </div>
     <img src="images/matt.webp" alt="Matt" width="150">
     </div>

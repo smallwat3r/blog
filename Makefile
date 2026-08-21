@@ -12,10 +12,10 @@ BLOG_OPTS := --toc -s --template=pandoc/template.html --lua-filter=pandoc/blog.l
 
 .PHONY: all build clean
 
-# Extract body after frontmatter
+# Extract body after frontmatter (print before counting, so body '---' lines survive)
 define frontmatter
 @mkdir -p $(dir $@)
-@awk '/^---$$/{n++; next} n>=2' $<
+@awk 'n>=2; /^---$$/{n++}' $<
 endef
 
 all: build
@@ -24,7 +24,7 @@ $(VENV):
 	python3 -m venv $(VENV)
 	$(VENV)/bin/pip install -q jinja2
 
-$(BUILD)/blog/%.html: content/blog/%.dj
+$(BUILD)/blog/%.html: content/blog/%.dj pandoc/template.html pandoc/blog.lua
 	$(frontmatter) | $(PANDOC) $(BLOG_OPTS) -o $@
 
 $(BUILD)/%.html: content/%.dj

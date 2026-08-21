@@ -9,8 +9,8 @@
 {% for post in posts %}
     <item>
       <title>{{ post.title }}</title>
-      <link>{{ domain }}/{{ post.path | replace('.html', '') }}</link>
-      <guid>{{ domain }}/{{ post.path | replace('.html', '') }}</guid>
+      <link>{{ post.url }}</link>
+      <guid>{{ post.url }}</guid>
       <description>{{ post.description }}</description>
       <pubDate>{{ post.date | rfc822 }}</pubDate>
     </item>
