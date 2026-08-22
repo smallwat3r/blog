@@ -111,3 +111,11 @@ footer { margin-top: 0; padding-top: 0; }
 .cv .about-content { margin-top: 2.5em; }
 .cv h2 { font-size: 1.1em; margin: 1.5em 0 0.5em 0; }
 .cv .updated { color: var(--color-text-muted); font-size: 14px; }
+
+/* Experience: dates in a second column above 768px, stacked below */
+.cv .date { display: block; }
+@media (min-width: 768px) {
+  .cv .title { display: inline-block; width: 21em; }
+  .cv .date { display: inline; }
+}
+

@@ -1,6 +1,6 @@
 ---
 title: CV
-description: Senior Software Engineer in London. Ten years of backend systems, platforms and robotics.
+description: Senior Software Engineer in London. Ten years of backend systems and robotics.
 date: 2026-08-22T12:00
 lastmod: 2026-08-22T12:00
 ---
@@ -16,36 +16,44 @@ myself.
 
 ## Experience
 
-[Apian](https://apian.health), Senior Backend Engineer, Aug 2023 to present\
+[Senior Backend Engineer at [Apian](https://apian.health)]{.title}
+[Aug 2023 to present]{.date}\
 Architect the platform behind the NHS drone delivery network, and lead the
 robotics stack for autonomous in-hospital deliveries.
 
-[Skin + Me](https://www.skinandme.com), Senior Software Engineer, Sept 2021 to Aug 2023\
+[Senior Software Engineer at [Skin + Me](https://www.skinandme.com)]{.title}
+[Sept 2021 to Aug 2023]{.date}\
 Built factory management systems running a 24/7 facility producing thousands
 of personalised prescription orders a day.
 
-[Bramfitt Tech Labs](https://bramfitt-tech-labs.com), Software Engineer, Feb 2020 to Sept 2021\
+[Software Engineer at [Bramfitt Tech Labs](https://bramfitt-tech-labs.com)]{.title}
+[Feb 2020 to Sept 2021]{.date}\
 Built a vulnerability management platform automating application security
 scanning, rolled out across a major energy company.
 
-Self-employed, Software Engineer (Contract), 2019 to 2020\
+[Freelance Software Engineer]{.title}
+[2019 to 2020]{.date}\
 Web applications, integrations and backend systems for early-stage e-commerce
 start-ups.
 
-Soda Says, Lead Developer, Oct 2018 to Dec 2019\
+[Lead Developer at Soda Says]{.title}
+[Oct 2018 to Dec 2019]{.date}\
 First technical hire, automated stock and order management end to end, letting
 a very small team run at a scale that would otherwise have needed a third party
 warehouse team and software.
 
-[Eve Sleep](https://www.evesleep.co.uk), Software Developer, Sept 2017 to Oct 2018\
+[Software Developer at [Eve Sleep](https://www.evesleep.co.uk)]{.title}
+[Sept 2017 to Oct 2018]{.date}\
 Dedicated engineer to supply chain and operations, building tooling for
 logistics, inventory and orders.
 
-[Made.com](https://www.made.com), Operations EU, Jan 2016 to Sept 2017\
+[Operations, EU at [Made.com](https://www.made.com)]{.title}
+[Jan 2016 to Sept 2017]{.date}\
 Automated my own role and several team processes, which turned out to be the
 start of my engineering career.
 
-[Kuhn Group](https://www.kuhn.com), Supply Chain Engineer, Sept 2013 to Aug 2015\
+[Supply Chain Engineer at [Kuhn Group](https://www.kuhn.com)]{.title}
+[Sept 2013 to Aug 2015]{.date}\
 Supply chain and operations for an international agricultural machinery
 manufacturer, in Brittany, France.
 
@@ -62,15 +70,15 @@ soldering.
 A few things I've built across widely different domains, hardware, security,
 fonts and embedded.
 
-[Smallcat](https://github.com/smallwat3r/smallcat) - 26-key split
+[Smallcat](https://github.com/smallwat3r/smallcat), 26-key split
 keyboard, designed end to end, and the one I type on every day.\
-[Shhh](https://github.com/smallwat3r/shhh) - encrypted one-time secret sharing,
+[Shhh](https://github.com/smallwat3r/shhh), encrypted one-time secret sharing,
 in Flask.\
-[Secretapi](https://github.com/smallwat3r/secretapi) - the successor to Shhh,
+[Secretapi](https://github.com/smallwat3r/secretapi), the successor to Shhh,
 rewritten in Go with a CLI client.\
-[Rpi-gardener](https://github.com/smallwat3r/rpi-gardener) - houseplant
+[Rpi-gardener](https://github.com/smallwat3r/rpi-gardener), houseplant
 monitoring on a Raspberry Pi and a Pico.\
-[Ocrab](https://github.com/smallwat3r/ocrab-font) - a monospace font built from
+[Ocrab](https://github.com/smallwat3r/ocrab-font), a monospace font built from
 OCR A and OCR B.
 
 More of them on [github](https://github.com/smallwat3r), or written up on this
