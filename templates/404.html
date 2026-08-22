@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block description %}Page not found{% endblock %}
+{% block title %}Page not found - smallwat3r{% endblock %}
+
+{% block meta %}
+    <meta name="robots" content="noindex">
+{% endblock %}
+
+{# absolute paths, a 404 can be served from any depth #}
+{% block stylesheet %}/style.css{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/index.css">
+{% endblock %}
+
+{% block body_class %} class="about"{% endblock %}
+
+{% block body %}
+    <div class="container">
+    <div class="back-link"><a class="back" href="/">← back</a></div>
+
+    <div class="about-content">
+    <div>
+<h1>404</h1>
+<p>This page does not exist.</p>
+    </div>
+    </div>
+
+    {% include "partials/footer.html" %}
+    </div>
+{% endblock %}

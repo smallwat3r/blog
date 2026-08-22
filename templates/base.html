@@ -8,7 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{% block description %}{% endblock %}">
     <meta name="author" content="Matt Petiteau">
-    <link rel="canonical" href="{% block canonical %}{% endblock %}">
+{% set canonical_url %}{% block canonical %}{% endblock %}{% endset %}
+{% if canonical_url %}    <link rel="canonical" href="{{canonical_url}}">
+{% endif %}
 {% block meta %}{% endblock %}
     <title>{% block title %}{% endblock %}</title>
 {% block structured_data %}{% endblock %}

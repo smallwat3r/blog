@@ -135,6 +135,7 @@ def build() -> None:
             posts=posts, pages=pages, index=index,
         ),
     )
+    write("404.html", env.get_template("404.html").render())
     write("feed.xml", env.get_template("feed.xml").render(posts=posts, index=index))
 
     shutil.make_archive("dist", "zip", DIST)
