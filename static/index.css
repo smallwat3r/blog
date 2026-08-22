@@ -110,3 +110,4 @@ footer { margin-top: 0; padding-top: 0; }
 .cv .container { width: 100%; max-width: 750px; }
 .cv .about-content { margin-top: 2.5em; }
 .cv h2 { font-size: 1.1em; margin: 1.5em 0 0.5em 0; }
+.cv .updated { color: var(--color-text-muted); font-size: 14px; }

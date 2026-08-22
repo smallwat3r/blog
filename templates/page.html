@@ -36,9 +36,7 @@
 
 {% block body %}
     <div class="container">
-    <div class="back-link">
-{% if page.slug == "about" %}<a href="/cv">cv</a> · {% endif %}
-      <a class="back" href="/">← back</a></div>
+    <div class="back-link"><a class="back" href="/">← back</a></div>
 
     <div class="about-content">
     <div>
@@ -48,6 +46,9 @@
     <img src="images/matt.webp" alt="Matt" width="150">
 {% endif %}
     </div>
+{% if page.slug == "cv" %}
+    <p class="updated">Last updated {{page.lastmod | date_month}}</p>
+{% endif %}
 
     {% include "partials/footer.html" %}
     </div>
