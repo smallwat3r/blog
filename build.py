@@ -108,7 +108,7 @@ def build() -> None:
         reverse=True,
     )
     all_tags = sorted({t for p in posts for t in p.tags})
-    about = collect_content(CONTENT / "about.dj")
+    pages = [collect_content(CONTENT / f"{name}.dj") for name in ("about", "cv")]
     index = collect_content(CONTENT / "index.dj")
 
     print("Building:")
@@ -117,10 +117,11 @@ def build() -> None:
             f"blog/{post.slug}.html",
             env.get_template("blog.html").render(post=post),
         )
-    write(
-        "about.html",
-        env.get_template("about.html").render(page=about),
-    )
+    for page in pages:
+        write(
+            f"{page.slug}.html",
+            env.get_template("page.html").render(page=page),
+        )
     write(
         "index.html",
         env.get_template("index.html").render(
@@ -130,7 +131,7 @@ def build() -> None:
     write(
         "sitemap.xml",
         env.get_template("sitemap.xml").render(
-            posts=posts, about=about, index=index,
+            posts=posts, pages=pages, index=index,
         ),
     )
     write("feed.xml", env.get_template("feed.xml").render(posts=posts, index=index))

@@ -4,10 +4,12 @@
     <loc>{{ domain }}/</loc>
     <lastmod>{{ index.lastmod | date_short }}</lastmod>
   </url>
+{% for page in pages %}
   <url>
-    <loc>{{ about.url }}</loc>
-    <lastmod>{{ about.lastmod | date_short }}</lastmod>
+    <loc>{{ page.url }}</loc>
+    <lastmod>{{ page.lastmod | date_short }}</lastmod>
   </url>
+{% endfor %}
 {% for post in posts %}
   <url>
     <loc>{{ post.url }}</loc>

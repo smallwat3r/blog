@@ -75,7 +75,7 @@ footer { margin-top: 0; padding-top: 0; }
   body { padding: 0 15px; }
 }
 
-/* About page */
+/* About and CV pages */
 .about-content {
   display: flex;
   flex-direction: column-reverse;
@@ -99,9 +99,14 @@ footer { margin-top: 0; padding-top: 0; }
     height: 150px;
   }
 }
-.about p { line-height: 1.2; margin: 0 0 1em 0; }
-.about .footer-section { margin-top: auto; }
+:is(.about, .cv) p { line-height: 1.2; margin: 0 0 1em 0; }
+:is(.about, .cv) .footer-section { margin-top: auto; }
 .about pre {
   white-space: pre-wrap; overflow-wrap: break-word;
   width: 100%; margin: 0 0 2em 0;
 }
+
+/* CV page */
+.cv .container { width: 100%; max-width: 750px; }
+.cv .about-content { margin-top: 2.5em; }
+.cv h2 { font-size: 1.1em; margin: 1.5em 0 0.5em 0; }

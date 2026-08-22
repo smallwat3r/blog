@@ -1,0 +1,83 @@
+---
+title: CV
+description: Senior Software Engineer in London. Ten years of backend systems, platforms and robotics.
+date: 2026-08-22T12:00
+lastmod: 2026-08-22T12:00
+---
+
+I'm a Senior Software Engineer based in London. Ten years building backend
+systems that have to keep running: order and inventory platforms, software
+driving a 24/7 prescription factory, security scanning pipelines, and the
+platform and ground robotics behind the NHS drone delivery network. These days
+I spend as much time on architecture, design review and mentoring as on writing
+code myself.
+
+## Experience
+
+[Apian](https://apian.health), Senior Backend Engineer, Aug 2023 to present\
+Architect the platform behind the NHS drone delivery network, and lead the
+robotics stack for autonomous in-hospital deliveries.
+
+[Skin + Me](https://www.skinandme.com), Senior Software Engineer, Sept 2021 to Aug 2023\
+Built factory management systems running a 24/7 facility producing thousands
+of personalised prescription orders a day.
+
+[Bramfitt Tech Labs](https://bramfitt-tech-labs.com), Software Engineer, Feb 2020 to Sept 2021\
+Built a vulnerability management platform automating application security
+scanning, rolled out across a major energy company.
+
+Self-employed, Software Engineer (Contract), 2019 to 2020\
+Web applications, integrations and backend systems for early-stage e-commerce
+start-ups.
+
+Soda Says, Lead Developer, Oct 2018 to Dec 2019\
+First technical hire, automated stock and order management end to end, letting
+a very small team run at a scale that would otherwise have needed a third party
+warehouse team and software.
+
+[Eve Sleep](https://www.evesleep.co.uk), Software Developer, Sept 2017 to Oct 2018\
+Dedicated engineer to supply chain and operations, building tooling for
+logistics, inventory and orders.
+
+[Made.com](https://www.made.com), Operations EU, Jan 2016 to Sept 2017\
+Automated my own role and several team processes, which turned out to be the
+start of my engineering career.
+
+[Kuhn Group](https://www.kuhn.com), Supply Chain Engineer, Sept 2013 to Aug 2015\
+Supply chain and operations for an international agricultural machinery
+manufacturer, in Brittany, France.
+
+## Skills
+
+Python, SQL, Bash, Go, JS, Elisp. REST APIs, microservices, message queues,
+event-driven pipelines. PostgreSQL, MySQL, SQLite, Redis, MongoDB. GCP, AWS,
+Azure, Terraform, Docker, Linux, CI/CD. ROS 2, Nav2, SLAM. SAST,
+DAST and SCA. System architecture, design review, mentoring, and a fair bit of
+soldering.
+
+## Projects
+
+A few things I've built across widely different domains, hardware, cryptography,
+fonts and embedded.
+
+[Smallcat](https://github.com/smallwat3r/smallcat) - 26-key split
+keyboard, designed end to end, and the one I type on every day.\
+[Shhh](https://github.com/smallwat3r/shhh) - encrypted one-time secret sharing,
+in Flask.\
+[Secretapi](https://github.com/smallwat3r/secretapi) - the successor to Shhh,
+rewritten in Go with a CLI client.\
+[Rpi-gardener](https://github.com/smallwat3r/rpi-gardener) - houseplant
+monitoring on a Raspberry Pi and a Pico.\
+[Ocrab](https://github.com/smallwat3r/ocrab-font) - a monospace font built from
+OCR A and OCR B.
+
+More of them on [github](https://github.com/smallwat3r), or written up on this
+blog.
+
+## Education
+
+2015 MSc, Intl. Supply Chain Management, Rennes School of Business, France\
+2015 Master's, Supply Chain, ESLI, Redon, France\
+2012 DUT, Logistics & Transport Management, UBO, France
+
+References available on request.
