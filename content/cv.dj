@@ -74,18 +74,20 @@ A few things I've built across widely different domains, web, hardware, security
 and fonts.
 
 [Smallcat](https://github.com/smallwat3r/smallcat), 26-key split keyboard,
-designed end to end, and the one I type on every day.
+designed end to end, from PCB and case to the firmware running on its RP2040.
+The one I type on every day.
 
 [Shhh](https://github.com/smallwat3r/shhh), encrypted one-time secret sharing,
-in Flask.
+in Flask. Fernet with a per-secret salt, passphrases never stored, and secrets
+destroyed on read, expiry or too many failed attempts.
 
 [Secretapi](https://github.com/smallwat3r/secretapi), the successor to Shhh,
-rewritten in Go with a CLI client.
+rewritten in Go with a CLI client. Stateless AES-256-GCM with Argon2id key
+derivation, Redis-backed expiry, in a 10MB image.
 
 [Rpi-gardener](https://github.com/smallwat3r/rpi-gardener), houseplant
 monitoring on a RPi, with a Pico and a custom PCB HAT. Sensor loops feeding
-event-driven services over a Redis pub/sub bus, streamed to a dashboard with
-SSE.
+services over a Redis pub/sub bus, streamed to a dashboard with SSE.
 
 [Ocrab](https://github.com/smallwat3r/ocrab-font), a monospace font merging
 OCR A and OCR B, with a few tweaks. Two typefaces designed for optical
