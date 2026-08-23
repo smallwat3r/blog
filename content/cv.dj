@@ -83,7 +83,7 @@ destroyed on read, expiry or too many failed attempts.
 
 [Secretapi](https://github.com/smallwat3r/secretapi), the successor to Shhh,
 rewritten in Go with a CLI client. Stateless AES-256-GCM with Argon2id key
-derivation, Redis-backed expiry, in a 10MB image.
+derivation, Redis-backed expiry, in a <10MB image.
 
 [Rpi-gardener](https://github.com/smallwat3r/rpi-gardener), houseplant
 monitoring on a RPi, with a Pico and a custom PCB HAT. Sensor loops feeding
