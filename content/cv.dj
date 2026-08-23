@@ -80,7 +80,9 @@ in Flask.\
 [Secretapi](https://github.com/smallwat3r/secretapi), the successor to Shhh,
 rewritten in Go with a CLI client.\
 [Rpi-gardener](https://github.com/smallwat3r/rpi-gardener), houseplant
-monitoring on a Raspberry Pi and a Pico.\
+monitoring on a Raspberry Pi, with a Pico and the sensors on a custom PCB HAT.
+A MicroPython sensor loop feeding event-driven asyncio services over a Redis
+pub/sub bus, streamed to the browser with SSE.\
 [Ocrab](https://github.com/smallwat3r/ocrab-font), a monospace font merging
 OCR A and OCR B, with a few tweaks. Two typefaces designed for optical
 character recognition, so no character can be mistaken for another.
