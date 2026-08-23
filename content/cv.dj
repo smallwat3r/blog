@@ -73,16 +73,20 @@ soldering.
 A few things I've built across widely different domains, web, hardware, security,
 and fonts.
 
-[Smallcat](https://github.com/smallwat3r/smallcat), 26-key split
-keyboard, designed end to end, and the one I type on every day.\
+[Smallcat](https://github.com/smallwat3r/smallcat), 26-key split keyboard,
+designed end to end, and the one I type on every day.
+
 [Shhh](https://github.com/smallwat3r/shhh), encrypted one-time secret sharing,
-in Flask.\
+in Flask.
+
 [Secretapi](https://github.com/smallwat3r/secretapi), the successor to Shhh,
-rewritten in Go with a CLI client.\
+rewritten in Go with a CLI client.
+
 [Rpi-gardener](https://github.com/smallwat3r/rpi-gardener), houseplant
 monitoring on a RPi, with a Pico and a custom PCB HAT. Sensor loops feeding
 event-driven services over a Redis pub/sub bus, streamed to a dashboard with
-SSE.\
+SSE.
+
 [Ocrab](https://github.com/smallwat3r/ocrab-font), a monospace font merging
 OCR A and OCR B, with a few tweaks. Two typefaces designed for optical
 character recognition, so no character can be mistaken for another.
