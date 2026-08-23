@@ -81,8 +81,9 @@ in Flask.\
 rewritten in Go with a CLI client.\
 [Rpi-gardener](https://github.com/smallwat3r/rpi-gardener), houseplant
 monitoring on a Raspberry Pi and a Pico.\
-[Ocrab](https://github.com/smallwat3r/ocrab-font), a monospace font built from
-OCR A and OCR B.
+[Ocrab](https://github.com/smallwat3r/ocrab-font), a monospace coding font
+merging OCR A and OCR B, with a few tweaks. Two typefaces designed for optical
+character recognition, where no two characters can be confused.
 
 More of them on [github](https://github.com/smallwat3r), or written up on this
 blog.
