@@ -1,0 +1,645 @@
+---
+title: claude-airlock, sandboxing and tracing Claude Code
+description: My Claude Code Docker sandbox grew from a bash script into its own project. You choose the tools that go in the image, everything a session does is traced (network, processes, resources), and a simple line by line UI shows it all as it happens.
+date: 2026-11-20T09:30
+tags: docker, security, ai, python
+---
+
+## Introduction
+
+A few months ago I wrote about
+[sandboxing Claude Code with Docker](claude-docker-sandbox.html). It was
+a bash script of about 300 lines that ran Claude in a locked-down
+container, with only the current project mounted.
+
+That script has since grown into its own project,
+[claude-airlock [(e27bdd9)]{.commit}](https://github.com/smallwat3r/claude-airlock/tree/e27bdd9):
+
+```console
+cd my-project
+claude-airlock    # builds the image on first use
+```
+
+The bash script is gone. Parsing packet captures and following a
+session live was too much for it, so the launcher is now written in
+Python. But only with the standard library, no dependencies at all. I
+did not want a security tool that starts by pulling packages from the
+internet, and I did not want an install step either. With Docker and
+Python 3.9 or later on the machine, you clone the repository, put its
+`bin/` on your `PATH`, and that is it.
+
+The container is still there, and still the permission boundary. But
+the container only tells me what Claude can reach. It does not tell me
+what Claude did. When a session runs `npm install`, which hosts did it
+talk to? How much memory is it using? Did it touch a file outside the
+project?
+
+The sandbox itself also got more secure along the way. Claude's
+configuration is read-only inside it, the SSH agent is no longer
+forwarded unless I ask, and a session can run on a kernel of its own.
+More on that further down.
+
+But on top of the security, there are three things I care about this
+time:
+
+- choosing which tools go in the sandbox
+- tracing everything a session does, the network, the processes, the
+  resources
+- a simple UI that shows all of it together, line by line
+
+This post goes through each of them.
+
+::: note
+claude-airlock is still under development. It works today, but expect
+changes, including breaking ones. It is mostly developed on Linux,
+macOS should work too but sees less daily use.
+:::
+
+## I. Everyday usage
+
+`claude-airlock` takes the place of `claude`. Whatever it does not
+know itself is passed on, so the usual arguments keep working:
+
+```console
+claude-airlock                         # a session on the current project
+claude-airlock --resume                # claude's own flags pass through
+claude-airlock -p "summarise this" < notes.txt   # piped, no terminal needed
+```
+
+By default a session sees the current project and nothing else. When
+it needs more, I say so:
+
+```console
+claude-airlock --add-dir ~/code/api      # a second project, read-write
+claude-airlock --add-dir-ro ~/code/lib   # reference code, read-only
+claude-airlock --worktree feature-x      # a second session on its own git worktree
+```
+
+Each session is a container named after its project, so several can
+run side by side, each with its own view. There is also
+`~/claude-shared`, a scratch directory mounted in every session when it
+exists. I use it to hand a file to Claude, or to pass something from
+one session to another, without opening anything else.
+
+Since the container is the boundary, Claude is started with
+`--dangerously-skip-permissions` and does not ask before it uses a
+tool. If I want the questions back for a session,
+`CLAUDE_AIRLOCK_ASK=1` does that.
+
+## II. Choosing the tools
+
+In the first version, the image was one Dockerfile with my own tools in
+it. If you wanted something different, you edited my Dockerfile.
+
+Now the image is assembled from small pieces called features. The
+point is to be flexible. Nobody needs everything: someone who writes Go
+has no use for KiCad or ffmpeg, and should not have to build and carry
+them. So you pick the ones you want, and you can add your own on top:
+
+```console
+export CLAUDE_AIRLOCK_FEATURES="go python typst"
+```
+
+Or, to set it once for every session, list them in a file, one per
+line:
+
+```console
+mkdir -p ~/.config/claude-airlock
+printf 'go\npython\ntypst\n' > ~/.config/claude-airlock/features.txt
+```
+
+The variable wins over the file, so one session can still ask for
+something else.
+
+With no selection at all, every feature is built. That is what I do
+most of the time. The bundled features are the tools I use myself, so
+the full image is tailored to me. It is also a large one, which is the
+reason the selection exists for everybody else.
+
+There are about twenty of them: `go`, `python`, `typescript`, `cpp`,
+`terraform`, `docs` (pandoc and friends), `media` (ffmpeg, imagemagick),
+`kicad`, `reverse` for reverse engineering, and so on. Each one is a
+plain Dockerfile fragment.
+
+And when the tool you need is not in the list, you do not have to
+wait for me to add it, or to fork the project. Your own feature is a
+file in `~/.config/claude-airlock/features/`, picked like the bundled
+ones:
+
+```dockerfile
+# claude-feat: sqlite
+# claude-feat-md: sqlite3 CLI
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+The `claude-feat-md` line is a nice detail. It ends up in the
+instructions Claude starts with, so Claude knows what is installed
+and does not spend a turn finding out, or trying to install it again.
+
+A feature can also bring a language server. The `go` feature comes with
+gopls, `python` with pyright, and Claude gets go-to-definition and
+find-references without me setting up anything on the host.
+
+Two more comment lines exist. `claude-feat-requires` names another
+feature this one needs, so picking the first builds both.
+`claude-feat-lsp` is how a language server is declared. And a file
+with the same name as a bundled feature replaces it, so nothing in the
+project has to be forked to change a tool.
+
+Put together, this is how an image comes to be:
+
+![The parts of an image: base.Dockerfile, the features I picked, my own features and tail.Dockerfile are put in that order into one generated Dockerfile, which docker build turns into an image tagged with a hash of that Dockerfile. The claude-feat-md comment lines tell Claude what is installed, the claude-feat-lsp ones add language servers as a plugin](../images/claude-airlock/image.webp)
+
+The image is tagged with a hash of the Dockerfile that was generated
+for it. Change the selection or edit a fragment, and the next start
+rebuilds. Each set of features keeps its own image, so a small one for
+a Go project and a big one for hardware work can live side by side.
+They are several GB each though, so there is a command to clean up:
+
+```console
+claude-airlock --dockerfile   # print the generated Dockerfile
+claude-airlock --rebuild      # clean rebuild
+claude-airlock --prune        # delete all sandbox images but the current one
+```
+
+Everything is pinned, by digest, checksum or version, and Claude Code's
+auto-updater is off. Upgrading is something I decide to do, by running
+one script that refreshes the pins.
+
+And when I want to check what a session really has, `claude-airlock
+--shell` gives me bash in the very same sandbox, to look around.
+
+## III. Tracing everything
+
+This is the part that did not exist at all before.
+
+A session is no longer one container, it is three. Next to the one
+Claude runs in, there are two small sidecars that watch it:
+
+![The launcher on the host starts the session container, a capture sidecar and a process sidecar that share one network namespace, and reads their records and the transcript while the session runs. The egress proxy, the Docker socket proxy, the SSH agent and the gVisor runtime are opt-in](../images/claude-airlock/architecture.webp)
+
+The first sidecar runs `tcpdump` on the session's network. It sees
+every connection and every DNS lookup. It records where a connection
+went, how long it lasted and how many bytes went each way. Not the
+content. Seeing what was sent would be even better, but that means
+breaking HTTPS open, with a proxy in the middle and its own certificate
+trusted by the sandbox. That weakens the very thing we are trying to
+secure, and would probably come back to bite us.
+
+The second one looks at the session's processes, 25 times a second. It
+notes what runs, and which process opened which connection. It also
+reads how much memory and CPU the session uses.
+
+That sounds heavy, but it is not. The sidecars are tiny containers of
+their own, the process one is capped at 128 MB of memory, and the
+session runs just as smoothly with them as without. I do not notice any
+difference in performance.
+
+This is the most important idea of the whole project, so it is worth
+spelling out: *the record is taken from outside the session*.
+
+If the session kept its own log, the log would only be as honest as
+the session. A session that was talked into doing something it should
+not, by a prompt injection for instance, could just as well leave that
+part out,
+or rewrite it afterwards. A log that the watched party can edit proves
+nothing.
+
+The sidecars are separate containers. Claude cannot stop them, cannot
+reach their files, and cannot change a line of what they wrote. So
+Claude cannot tamper with the record, whatever it runs and whatever it
+was told. I am not asking the session what it did, I am watching it
+from the next room.
+
+![Inside the session, where Claude can write: Claude Code and what it runs, the project, and its own transcript. Outside, where it cannot stop, read or edit anything: the capture sidecar, the process sidecar and the launcher's copy of the transcript. Line mode and --trace show what was seen from outside](../images/claude-airlock/outside.webp)
+
+The tool calls themselves come from Claude Code's transcript. That file
+is written from inside the sandbox, so a session could rewrite its own
+history. The launcher copies it as it grows, about half a second behind,
+and compares the two afterwards. The first line is what I normally see,
+the second is what I would see if a session had cleaned up after itself:
+
+```
+# transcript  as the launcher copied it (212 lines)
+# transcript  CHANGED: 3 lines the launcher copied are gone or altered, they are shown as REMOVED
+```
+
+Put together, a connection is not just a line in a packet capture any
+more. It comes with the process that made it and the command Claude was
+running at the time. A single line of the trace says all of it, and it
+is a long one, so here it is in pieces:
+
+![Three records kept apart, the capture sidecar, the process sidecar and the transcript as the launcher copied it, are put together by time by the launcher into one line of the trace: where a connection went and how it ended, the process that made it, and the command Claude was running](../images/claude-airlock/trace-line.webp)
+
+The same line as text:
+
+```
+sandbox  net  tcp/https example.com (93.184.215.14):443
+              closed after 0.2s, 1 kB out, 2 kB in
+              by: [812] curl -sS https://example.com < bash < claude
+              during: $ make deploy
+```
+
+- First, where it went: the protocol, the name the session asked for,
+  the address it really reached, and the port.
+- Then how it ended: how long it stayed open, and the bytes each way.
+- `by:` is the process that made the connection, with its parents.
+  Here a `curl`, started by `bash`, started by `claude`.
+- `during:` is the command Claude was running at that moment.
+
+So Claude ran `make deploy`, which ran a `curl`, to that host, and sent
+1 kB. I would never have seen that in Claude Code's own output.
+
+Resources are traced the same way. Every 30 seconds there is a line
+like this one, and an earlier warning when the session gets close to a
+limit:
+
+```
+sandbox  health  mem 3.1g of 16g (19%)  cpu 240%  pids 87 of 512  top: [812] node 2g
+```
+
+Memory, CPU, the number of processes, and the biggest process. When
+something does run out, it says so, and names the likely victim:
+
+```
+sandbox  health  ALMOST OUT OF memory  mem 15g of 16g (93%)  cpu 96%  pids 91 of 512  top: [812] node 13g
+sandbox  health  OUT OF MEMORY, a process was ended for it  gone since: [812] node 14g
+```
+
+No more guessing why a build died halfway.
+
+A few other things are watched along the way:
+
+- DNS lookups with a very long name, or many different names under the
+  same domain, are flagged. That is how data gets smuggled out through
+  DNS, the trick I described in the first post.
+- A process that starts listening on a port is noted, and called out
+  when it listens on more than the session's own loopback, since other
+  sessions could then reach it.
+- A write outside the project is marked `OUTSIDE PROJECT`. This is
+  still inside the container, a session cannot write to the rest of my
+  machine. It means one of the few other places it is allowed to write:
+  `/tmp`, the cache, a second directory I mounted with `--add-dir`, or
+  the scratch directory shared between sessions. Usually harmless, but
+  a file left in a shared place is read by other sessions, so I want to
+  see it.
+
+I also tried to keep the trace honest about what it does not know. The
+`during:` part goes by the clock, so it is a good guess, not proof. A
+process that lived for less than a 25th of a second can be missed. And
+when no process at all was seen while a command ran, the trace says
+exactly that instead of pretending:
+
+```
+claude   bash   $ ./tools/sync.sh
+claude   bash   result: ok, 0.0s
+claude   bash   processes: none seen while it ran
+```
+
+## IV. Line mode
+
+I was never a fan of Claude Code's native UI. I run it in Emacs
+buffers, and it does not behave well there. It redraws itself all the
+time, so the buffer jitters, and every now and then it goes out of sync
+and leaves the screen in a mess.
+
+And recording all of the above is only useful if I actually look at it.
+So the trace became the UI.
+
+By default a session now runs in what I call line mode. There is a
+prompt, and above it, what the session does, one line at a time.
+
+![A turn in line mode. Under each command, in teal, the connections it made and how they ended: an install reaches a second host besides the registry, then a database refuses the connection, in red, during a test run that fails](../images/claude-airlock/line-mode.webp)
+
+Everything is mixed in the same stream. Orange is a command Claude
+ran, with the reason it gave. Teal is the network. Magenta is a file it
+edited, with the diff. Grey is the conversation and the resource use.
+Red, in bold and in capitals, is anything that went wrong: `REFUSED`,
+`DENIED`, `FAILED`.
+
+The first lines of a session say how the sandbox was started: the
+image, the limits, whether the network is filtered, and what is being
+recorded. If I opened a door, like the SSH agent, it is listed there
+too. So a look at the top of the buffer tells me what this session is
+allowed to do.
+
+Look at the `npm install` in the screenshot. While it ran, the session
+reached the npm registry, and also a second host that the install's
+output never mentions. A bit further down, `make test` fails, and the
+line just above says why: the database refused the connection.
+
+Each step also says how many tokens it used, and each turn how long it
+took and what it cost. The status line above the prompt has the model,
+how full the context is, the limits of my account, and the sandbox
+with its network mode.
+
+What I like most is that it is not really a TUI. Nothing is redrawn,
+nothing moves, there are no boxes or spinners. Lines are added at the
+bottom and that is it. So there is nothing left to jitter or go out of
+sync. It works the same in a terminal, in a file, or in a plain Emacs
+`M-x shell` buffer, where the whole session is just text I can search
+and scroll.
+
+It is still Claude Code underneath. It runs in its print mode, with no
+UI of its own, and talks JSON with the launcher. The launcher does the
+displaying, and adds what the sidecars saw in the same stream:
+
+![I type a line to the launcher, which passes it to Claude Code, running in print mode in the session container, as JSON Lines. What comes back from Claude Code, from the capture sidecar and from the process sidecar is put in one stream by the launcher, in the order it happened, and read a line at a time](../images/claude-airlock/line-mode-flow.webp)
+
+Most of what I use in Claude Code is there:
+
+- Tab completes commands and file names, Up and Down go through what I
+  typed before
+- `/model`, `/context`, `/compact`, `/clear`, `/resume`, and my own
+  commands and skills
+- `/mode plan` changes the permission mode
+- `!make test` runs a command in the sandbox without telling Claude
+- I can type while Claude works, it picks the line up when it can
+- Ctrl-C interrupts the turn, a second one stops the session
+
+When Claude asks for permission to use a tool, which only happens if I
+turned that on with `CLAUDE_AIRLOCK_ASK=1`, the question is a line like
+any other: `y` for this call, `a` for calls like it until the session
+ends, anything else to refuse.
+
+Since all of this depends on what Claude Code sends, line mode checks
+every message against what it expects. When a new version renames or
+moves something, it says so once, instead of quietly showing less.
+
+Claude Code's menus are not there, things like `/config` or `/rewind`,
+and neither is `/login`. For those, the native UI is one variable away:
+
+```console
+CLAUDE_AIRLOCK_LINE_MODE=0 claude-airlock   # then /login, /config...
+```
+
+For the login there is an even simpler way: log in with plain `claude`
+on the host. A session shares the host's login, so there is nothing
+more to do in the sandbox.
+
+## V. Looking back at a session
+
+The same lines are kept, so I can read a session again later:
+
+```console
+claude-airlock --trace               # the latest session of this project
+claude-airlock --trace list          # all of them
+claude-airlock --trace --failed      # only what went wrong
+claude-airlock --trace --only bash,net   # only the commands and the network
+claude-airlock --trace --follow      # live, from a second terminal
+```
+
+A trace opens with a summary of the session, then has everything in
+the order it happened:
+
+```
+# session     3fa9c0de-...  Fix the build
+# transcript  as the launcher copied it (212 lines)
+# project     /home/me/code/api
+# tool calls  12 (Bash 9, Edit 2, Read 1)
+# failed      1
+# files written
+#   /home/me/code/api/Makefile x2
+# sandbox     claude-api under runc, memory 16g, processes 512, all CPUs, network open
+# network
+#   tcp/https registry.npmjs.org (104.16.3.35):443 x4
+#   tcp/postgres 10.0.0.7:5432 x1
+```
+
+In a file or a pipe, every line starts with the date, who and what, so
+whatever `grep` finds makes sense on its own. There is a `--json` flag
+too, for `jq`:
+
+```console
+claude-airlock --trace --json | jq 'select(.what == "net")'
+```
+
+I do not want to read a trace after every session though. So when one
+ends, the launcher tells me what is worth a look, and says nothing if
+all is fine:
+
+```
+claude-airlock: of this session, claude-airlock --trace has the rest:
+  reached for the first time from this project:
+    tcp/https transfer.example (203.0.113.9):443
+  sent 14 MB to tcp/https gist.github.com (140.82.121.4):443
+  written outside the project:
+    /home/me/claude-shared/setup.sh
+```
+
+It remembers what each project usually talks to, so a new destination
+stands out. An upload of more than 10 MB to one place is mentioned.
+
+It also checks the files that could run something on my machine later.
+The project has to stay writable, git and Claude both need that, so
+these files cannot simply be locked. They are compared instead, before
+and after:
+
+- git's own: `.git/config` and the hooks
+- Claude's own: `.claude/settings.json`, `.mcp.json`, `CLAUDE.md`, and
+  the hooks, commands, skills and agents of the project
+- what my tools run: Makefiles, `package.json`, `pyproject.toml`,
+  `conftest.py`, pre-commit and husky configuration, CI workflows
+- what Claude remembers of the project, its memory directory, since a
+  note left there is read by every later session
+
+If a session changed one of them, I am told before I build, test or
+commit. It goes by content, so it does not matter whether the change
+came from an edit or from a `sed` buried in a script. The kept records
+do not grow forever either: the captures of the latest 100 sessions,
+and the transcript copies for 30 days.
+
+## VI. The rest of the sandbox
+
+The container is hardened the same way as before: no capabilities,
+read-only root filesystem, memory and process limits, running as my
+user. `.env` files still read as empty. A few things got stricter.
+
+### a) A `~/.claude` of its own
+
+In the first version, my real `~/.claude` was mounted read-write. A
+session could add a hook there, and that hook would run in every
+session after it, or on the host.
+
+Now the sandbox has its own. From mine, only the configuration, the
+plugins and the transcripts are mounted into it. `settings.json`,
+`CLAUDE.md`, and the hooks, commands, skills and agents are read-only.
+And a session only sees the history of its own project, the transcripts
+of the others are covered by empty directories.
+
+The login is the one thing that crosses. The launcher carries it
+between the host and the sandbox while a session runs, so I log in
+once, with `claude` on the host, and every session starts logged in.
+
+### b) Settings that fail loudly
+
+Everything is set with `CLAUDE_AIRLOCK_*` variables, in the environment
+or in a config file:
+
+```bash
+# ~/.config/claude-airlock/config
+CLAUDE_AIRLOCK_MEMORY=8g
+CLAUDE_AIRLOCK_NET_FILTER=1
+CLAUDE_AIRLOCK_FEATURES=go typst
+```
+
+A switch takes `1` or `0`. Anything else, `true` for instance, stops
+the launcher. So does a name it does not know. I would rather have it
+refuse to start than quietly run without a restriction I thought was
+on. The file is only read from my config directory, never from the
+project, which a session can write to.
+
+### c) Quiet by default
+
+A session does not phone home. Claude Code's telemetry and crash
+reports are switched off, and so are the usage reports of `gh` and of
+the common JavaScript frameworks. `DO_NOT_TRACK=1` is set for every
+other tool that honours it.
+
+The connectors of my claude.ai account, Gmail, Google Drive and the
+like, are not loaded either. They would reach my data from inside the
+sandbox, and their tools take room in every request. The same goes for
+the MCP servers I set up on the host: they come with tokens, so they
+stay out unless I add one to the sandbox myself.
+
+Each has its switch, `CLAUDE_AIRLOCK_TELEMETRY=1` and
+`CLAUDE_AIRLOCK_CONNECTORS=1`. It also makes the trace easier to read:
+with less background chatter, a connection I did not expect stands out.
+
+### d) gVisor
+
+Containers share the kernel of the host, and that is the weak spot of
+any Docker sandbox. Everything else in this post, the dropped
+capabilities, the read-only filesystem, the mounts, is enforced by that
+one kernel. A session that finds a flaw in it is out, and none of the
+rest matters any more.
+
+On Linux a session can run on [gVisor](https://gvisor.dev) instead:
+
+```console
+CLAUDE_AIRLOCK_RUNTIME=runsc-hostnet claude-airlock
+```
+
+gVisor is a kernel written to run in user space. The session gets that
+one as its own, and its system calls are answered by gVisor instead of
+going straight to the host. So a kernel exploit running in the session
+lands on gVisor, not on my machine. That is a big step up, closer to
+what a small virtual machine gives, and it comes without a VM to
+manage: it is still Docker, the same image, the same command, and the
+session starts just as fast.
+
+The launcher works out by itself whether a session runs under gVisor,
+and prints what differs at each start.
+
+There is a price. Under gVisor the process sidecar cannot see the
+session's processes, so those are not recorded. The network capture and
+the resource use still are.
+
+### e) The doors
+
+Three things can be opened to a session. All are closed by default,
+and each use is a line in the trace.
+
+The SSH agent, with `CLAUDE_AIRLOCK_SSH_AGENT=1`. The session does not
+get my agent directly, it gets a socket of the launcher's in front of
+it. Listing the keys and signing go through, adding or removing keys is
+refused, and each signature is noted:
+
+```
+sandbox  ssh-agent   signed a login as git with SHA256:Xk3... (me@laptop)
+```
+
+The Docker socket, with `CLAUDE_AIRLOCK_DOCKER_SOCKET=1`, still behind
+a read-only proxy. `1` allows `docker ps` and `docker logs`, nothing
+else. `full` adds `inspect`, `stats` and `top`, and is a separate value
+on purpose, since `docker inspect` shows the environment of every
+container on the host, secrets included.
+
+The egress filter, with `CLAUDE_AIRLOCK_NET_FILTER=1`. It works as in
+the first post: no route out, a squid proxy with an allowlist, DNS
+blackholed. With one big improvement. Before, a domain that was not on
+the list just failed, and I had to edit a file and relaunch. Now, with
+`CLAUDE_AIRLOCK_NET_ASK=1`, the proxy holds the request and asks me:
+
+![The session asks the egress proxy for a host. A host that is not on the list is held while line mode asks me. My answer goes back to the proxy for this host, until the session ends: a yes lets the request through to the internet, a no gives the session a 403, shown as DENIED in the trace](../images/claude-airlock/net-ask-flow.webp)
+
+And this is what it looks like in a session:
+
+![A filtered session in line mode. The registry is allowed by the list. A download from a host that is not listed waits while the user is asked and goes through after a yes, a later request to a metrics host is refused and shows as DENIED in red](../images/claude-airlock/net-ask.webp)
+
+Nothing is sent, or even looked up, before I answer. A yes is for that
+host only, until the session ends, and the list itself is not changed.
+In the screenshot the tests pass either way, but something in them
+wanted to call a metrics host, and I would never have known.
+
+### f) Prompt injection
+
+An agent that is not asked before it uses a tool is a nice target. A
+web page, a file in a dependency or the output of a command can hold
+text written for the model: run this, send that, do not tell the user.
+
+The launcher looks at what Claude is given to read, and flags text
+that:
+
+- tells the reader to drop its instructions
+- tells the reader to keep something from the user
+- is written to look like a message of the system or of the user
+- asks for secrets to be sent somewhere
+- is hidden, in characters that a terminal does not show
+
+By default it is only flagged, in red. With
+`CLAUDE_AIRLOCK_INJECTION_STOP=1`, line mode also stops the turn for
+the two that are never a normal way to write, the fake messages and the
+hidden text:
+
+![Line mode stopping a turn: a fetched page holds a made-up system_warning tag telling claude to run a script, it is flagged as a possible injection in red, the turn is stopped and the user is asked whether to keep or clear the conversation](../images/claude-airlock/injection-stop.webp)
+
+There are two questions because Claude has already read the text by
+then. Asking Claude whether it is safe would be asking the model that
+just read it. So I decide: go on, or clear the conversation and the
+text with it.
+
+This is a hint to look, nothing more. It knows a few ways of writing,
+the same thing said in other words goes through, and a page that merely
+talks about prompt injection sets it off too.
+
+::: sep
+\~\~\~
+:::
+
+## Wrapping up
+
+The first post was about building a wall around Claude. This one is
+about putting a window in it.
+
+What I get out of claude-airlock, day to day:
+
+- I choose the tools. The image holds what I picked, pinned, and Claude
+  knows what is there.
+- Everything is traced. Network, processes, memory, CPU, files, all
+  recorded from outside the session.
+- One simple UI. Line by line, everything in the same place, nothing
+  fancy.
+
+It is not finished. The project is still under development and I keep
+improving it as I go, usually because a session did something I wanted
+to see better. But it is fun to work on, and already great to use.
+
+## Links
+
+- [claude-airlock [(e27bdd9)]{.commit}](https://github.com/smallwat3r/claude-airlock/tree/e27bdd9),
+  the project
+- [Line mode](https://github.com/smallwat3r/claude-airlock/blob/e27bdd9/docs/line-mode.md),
+  what it shows and what you type
+- [Reviewing a session](https://github.com/smallwat3r/claude-airlock/blob/e27bdd9/docs/trace.md),
+  every line of `--trace` explained
+- [What the sandbox does](https://github.com/smallwat3r/claude-airlock/blob/e27bdd9/docs/sandbox.md),
+  mounts, hardening, gVisor and the doors
+- [The image](https://github.com/smallwat3r/claude-airlock/blob/e27bdd9/docs/image.md),
+  the features and how to add your own
+- [Known limits](https://github.com/smallwat3r/claude-airlock/tree/e27bdd9#known-limits),
+  what the sandbox does not protect against
+- [Sandboxing Claude Code with Docker](claude-docker-sandbox.html), the
+  previous post, where this started
