@@ -1,6 +1,7 @@
 -- Pandoc Lua filter for blog post transformations.
 --
 -- Transforms:
+--   Str: Keeps apostrophes straight
 --   Image: Copies alt text to title attribute for hover tooltips
 --   CodeBlock: Wraps in div with copy button (click handler in blog.js)
 --   Div: Converts djot sections to <section> elements with anchor links
@@ -25,6 +26,14 @@ function Link(el)
     el.classes:insert("external")
   end
   return el
+end
+
+-- Keeps apostrophes straight, djot's smart punctuation curls them.
+function Str(el)
+  if el.text:find("\u{2019}", 1, true) then
+    el.text = el.text:gsub("\u{2019}", "'")
+    return el
+  end
 end
 
 -- Sets image title from alt text so it shows on hover.
