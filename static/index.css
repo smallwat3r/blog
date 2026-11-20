@@ -27,9 +27,11 @@ footer { margin-top: 0; padding-top: 0; }
 @media (min-width: 500px) {
   .index li {
     display: flex; justify-content: space-between;
-    gap: 1em; flex-wrap: wrap;
+    gap: 1em; align-items: baseline;
   }
-  .index li .date { display: inline; }
+  /* A long title wraps within itself, the tags and the date stay on its first line */
+  .index li > a { flex: 1 1 auto; min-width: 0; }
+  .index li .date { display: inline; flex-shrink: 0; white-space: nowrap; }
 }
 @media (min-width: 768px) {
   .index h1 { padding-right: 0; }
