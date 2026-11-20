@@ -1,5 +1,5 @@
 ---
-title: claude-airlock, sandboxing and tracing Claude Code
+title: claude-airlock, tracing Claude Code
 description: My Claude Code Docker sandbox grew from a bash script into its own project. You choose the tools that go in the image, everything a session does is traced (network, processes, resources), and a simple line by line UI shows it all as it happens.
 date: 2026-11-20T09:30
 tags: docker, security, ai, python
